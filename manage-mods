@@ -1,0 +1,24 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+BEGIN {
+  use FindBin '$RealScript';
+  use File::Basename;
+  $ENV{BASENAME} = basename( $RealScript );
+}
+
+use lib "$ENV{BASENAME}/lib";
+
+use Log::Any::Adapter;
+use GetData;
+
+#Log::Any::Adapter->set( 'File', "$HOME/.local/$ENV{BASENAME}" );
+Log::Any::Adapter->set( 'File', "$ENV{BASENAME}.log" );
+
+my $data = get_data('https://api.cfwidget.com/mc-mods/minecraft/jei');
+
+use JSON;
+my $json = JSON->new;
+print $json->pretty->encode($data);

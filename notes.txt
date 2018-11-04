@@ -1,0 +1,27 @@
+Currently only supporting curseforge downloads.
+
+Configuration file holds an array of directories that contain multimc config
+files.
+
+If not set, defaults to $HOME/.local/share/multimc.
+
+Pull the instance directory paths from the config file(s).
+
+In each instance dir parse modlist.cfg. See sample cfg for details on format.
+
+For each mod:
+
+Get cfwidget page (it should be cached once every 24 hours) and parse
+information from it based on what was on the modlist config line.
+
+Get the appropriate files page (it should be cached once every 24 hours) and
+grab the md5sum, and whatever else is needed.
+
+If the jar does not exist, or does not match the md5sum, download the jar file
+and store it. Defaults to "$MultiMC_DIR/mods".
+
+Create a link for the correct version of the mod in the instance mods dir.
+
+TODO:
+
+Do the same for resource packs, texture packs and mod packs.
