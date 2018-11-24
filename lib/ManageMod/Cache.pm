@@ -3,7 +3,45 @@ package ManageMod::Cache;
 use strict;
 use warnings;
 
-use base "Exporter::Tiny";
+#############################################################################
+=head1 NAME
+
+ManageMod::Cache - Returns a CHI cache object
+
+=head1 SYNOPSIS
+
+  use ManageMod::Cache;
+
+  my $cache = cache();
+
+  my $copts = { label => 'mylabel', namespace => 'mynamespace' };
+
+  my $cache2 = cache( $copts );
+
+=head1 FUNCTIONS
+
+=head2 cache
+
+Calling C<cache> with no parameters will return a base C<CHI> cache object
+with the following options:
+
+  { depth      => 2,
+    driver     => 'File',
+    expires_in => '24 hours',
+    label      => 'manage-mods',
+    namespace  => 'manage-mods',
+    root_dir   => '~/.cache/manage-mods',
+  }
+
+You can create a hash with all the same options the C<CHI->new> method is
+expecting, with the following addition:
+
+C<cache_dir> is synonymous with C<root_dir>
+
+=cut
+#############################################################################
+
+use parent "Exporter::Tiny";
 
 our @EXPORT = qw(cache);
 
@@ -25,7 +63,7 @@ sub cache {
 
   $cache_opts //= {};
 
-  die "_cache expects a hash-ref as an argument"
+  die $log->fatalf( '%s expects a hash-ref as an argument', (caller(0))[3] )
     unless ref $cache_opts eq 'HASH';
 
   $cache_opts->{label}     //= $DEFAULT_BASENAME;
@@ -34,11 +72,11 @@ sub cache {
 
   my $copts = merge $DEFAULT_CACHE_OPTS, $cache_opts;
 
-  $log->warn( "Creating CHI object" );
-  $log->debug( "$_: $copts->{$_}" ) for keys %$copts;
+  $log->warn( 'Creating CHI object' );
+  $log->debug( 'copts: ', $copts );
 
   return CHI->new( %$copts );
 
-} ## end sub _cache
+} ## end sub cache
 
 1;

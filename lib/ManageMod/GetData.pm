@@ -5,35 +5,59 @@ use v5.10;
 use strict;
 use warnings;
 
-use base "Exporter::Tiny";
-
-our @EXPORT = qw(get_data);
-
-use File::Basename;
-use Log::Any '$log';
-
-use ManageMod::Cache;
+#############################################################################
 
 =head1 NAME
 
-ManageMod::GetData - ...
+ManageMod::GetData - Gets json data from E<36>url and caches it.
 
 =head1 SYNOPSIS
 
   use ManageMod::GetData;
 
-XXX PUT A SYNOPSIS HERE!!! XXX
+  my $data = get_data( $url );
 
-=head1 FUNCTION
+  my $copts = { label => 'mylabel', namespace => 'mynamespace' };
 
-...
+  my $data2 = get_data( $url, $copts );
+
+=head1 FUNCTIONS
 
 =cut
 
-sub get_data {
+#############################################################################
+use parent "Exporter::Tiny";
+
+our @EXPORT = qw(get_json get_html);
+
+use Clone 'clone';
+use HTML5::DOM;
+use JSON;
+use Log::Any '$log';
+
+use ManageMod::Cache;
+
+#############################################################################
+
+=head2 _get_url
+
+XXX
+
+=cut
+
+sub _get_url {
   my ( $url, $cache_opts ) = @_;
 
-  $cache_opts->{label} //= __PACKAGE__;
+  die $log->fatalf( '%s expects a uri to be used with UserAgent', ( caller( 0 ) )[3] )
+    unless ref $url eq '' && $url ne '';
+
+  $cache_opts //= {};
+
+  die $log->fatalf( '%s expects a hash-ref as the second parameter', ( caller( 0 ) )[3] )
+    unless ref $cache_opts eq 'HASH';
+
+  $cache_opts->{label}     //= __PACKAGE__;
+  $cache_opts->{namespace} //= 'raw-urls';
 
   my $cache = cache( $cache_opts );
   my $data  = $cache->get( $url );
@@ -43,22 +67,85 @@ sub get_data {
     require HTTP::Request;
 
     my $ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => 1 } );
-    my $header = HTTP::Request->new( GET => $url );
-    my $request = HTTP::Request->new( 'GET', $url, $header );
+    my $header   = HTTP::Request->new( GET => $url );
+    my $request  = HTTP::Request->new( 'GET', $url, $header );
     my $response = $ua->request( $request );
 
     # XXX: need to handle errors here
 
-    require JSON;
+    $data = $response->content;
+    $cache->set( $url, $data );
+  }
+
+  return $data;
+} ## end sub _get_url
+
+#############################################################################
+
+=head2 get_json
+
+=over
+
+=item Required: E<36>url
+
+=item Optional: E<36>hashref of options to be passed to C<ManageMod::Cache>
+
+=back
+
+Gets json data from C<E<36>url> and returns the objectified data.
+
+=cut
+
+sub get_json {
+  my ( $url, $cache_opts ) = @_;
+
+  $cache_opts //= {};
+
+  die $log->fatalf( '%s expects a hash-ref as the second parameter', ( caller( 0 ) )[3] )
+    unless ref $cache_opts eq 'HASH';
+
+  my $json_copts = clone( $cache_opts );
+  $json_copts->{label}     //= __PACKAGE__;
+  $json_copts->{namespace} //= 'json-data';
+
+  my $cache = cache( $json_copts );
+  my $data  = $cache->get( $url );
+
+  unless ( defined $data ) {
+    $data = _get_url( $url, $cache_opts );
     my $json = JSON->new;
 
     $log->warn( "Converting response content to json object" );
-    $data = $json->decode( $response->content );
-
+    $data = $json->decode( $data );
     $cache->set( $url, $data );
-  } ## end unless ( defined $data )
+  }
 
   return $data;
-} ## end sub get_data
+} ## end sub get_json
+
+#----------------------------------------------------------------------------
+
+=head2 get_html
+
+=over
+
+=item Required: E<36>url
+
+=item Optional: E<36>hashref of options to be passed to C<ManageMod::Cache>
+
+=back
+
+Get's the html from E<36>url and returns it as a dom object.
+
+=cut
+
+sub get_html {
+  my ( $url, $cache_opts ) = @_;
+
+  my $data = _get_url( $url, $cache_opts );
+
+  my $parser = HTML5::DOM->new;
+  return $parser->parse( $data );
+}
 
 1;
