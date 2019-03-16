@@ -6,21 +6,26 @@ use warnings;
 BEGIN {
   use FindBin '$RealScript';
   use File::Basename;
-  $ENV{BASENAME} = basename( $RealScript );
+
+  $ENV{MANAGE_MOD_BASENAME} = basename( $RealScript );
+  $ENV{MANAGE_MOD_VERSION} = '0.01';
+  $ENV{MANAGE_MOD_CACHE_DIR} = "$ENV{HOME}/.cache/$ENV{MANAGE_MOD_BASENAME}";
+
+  [[ -d $ENV{MANAGE_MOD_CACHE_DIR} ]]
+    or mkdir $ENV{MANAGE_MOD_CACHE_DIR}
+      or die "Unable to create cache dir.";
 }
 
-use lib "$ENV{BASENAME}/lib";
+use lib "$ENV{MANAGE_MOD_BASENAME}/lib";
 
 use Log::Any::Adapter;
-
-#use ManageMod::GetData;
 use ManageMod::GetMod;
 
 #Log::Any::Adapter->set( 'File', "$HOME/.local/$ENV{BASENAME}" );
-Log::Any::Adapter->set( 'File', "$ENV{BASENAME}.log" );
+Log::Any::Adapter->set( 'File', "$ENV{MANAGE_MOD_BASENAME}.log" );
 
-my $data = get_mod('jei', '1.12.2', 'release,beta');
+my $data = get_mod_info('jei', '1.12.2', 'release,beta');
 
-use JSON;
-my $json = JSON->new;
-print $json->pretty->encode($data);
+#use JSON;
+#my $json = JSON->new;
+#print $json->pretty->encode($data);

@@ -1,0 +1,28 @@
+
+#use Data::Dump 'dump';
+#use Devel::Command;
+#use DB::Color; # https://github.com/Ovid/DB--Color
+use POSIX 'strftime';
+use Time::HiRes;
+
+$DB::deep = 1000; # increase recursion limit
+
+sub afterinit {
+
+  push @$DB::pretype, 'v'
+    unless grep { /^v$/ } @$DB::pretype;
+
+  push @DB::typeahead,
+    '$|++',
+    'o windowSize=40',
+    'o inhibit_exit=0',
+    '{l',
+    '$Data::Dumper::Quotekeys = ""',
+    '$Data::Dumper::Sortkeys++',
+    '$Data::Dumper::Deparse++',
+    '> $t0 = [ Time::HiRes::gettimeofday() ]',
+    '< printf "\n\n*** Last instruction took %f seconds ***\n\n", Time::HiRes::tv_interval( $t0, [ Time::HiRes::gettimeofday() ] )',
+    'l',
+  ;
+}
+#    '!!clear',

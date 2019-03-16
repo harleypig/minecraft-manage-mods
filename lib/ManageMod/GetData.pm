@@ -9,7 +9,7 @@ use warnings;
 
 =head1 NAME
 
-ManageMod::GetData - Gets json data from E<36>url and caches it.
+ManageMod::GetData - Gets data from E<36>url and caches it.
 
 =head1 SYNOPSIS
 
@@ -31,8 +31,6 @@ use parent "Exporter::Tiny";
 our @EXPORT = qw(get_json get_html);
 
 use Clone 'clone';
-use HTML5::DOM;
-use JSON;
 use Log::Any '$log';
 
 use ManageMod::Cache;
@@ -59,6 +57,8 @@ sub _get_url {
   $cache_opts->{label}     //= __PACKAGE__;
   $cache_opts->{namespace} //= 'raw-urls';
 
+  my $useragent = delete $cache_opts->{agent} || "HarleyPig's Mod Manager/$ENV{MANAGE_MOD_VERSION}";
+
   my $cache = cache( $cache_opts );
   my $data  = $cache->get( $url );
 
@@ -67,6 +67,8 @@ sub _get_url {
     require HTTP::Request;
 
     my $ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => 1 } );
+    $ua->agent( $useragent );
+
     my $header   = HTTP::Request->new( GET => $url );
     my $request  = HTTP::Request->new( 'GET', $url, $header );
     my $response = $ua->request( $request );
@@ -113,6 +115,8 @@ sub get_json {
 
   unless ( defined $data ) {
     $data = _get_url( $url, $cache_opts );
+
+    require JSON;
     my $json = JSON->new;
 
     $log->warn( "Converting response content to json object" );
@@ -142,10 +146,50 @@ Get's the html from E<36>url and returns it as a dom object.
 sub get_html {
   my ( $url, $cache_opts ) = @_;
 
-  my $data = _get_url( $url, $cache_opts );
+  my $html_copts = clone( $cache_opts );
+  $html_copts->{label}     //= __PACKAGE__;
+  $html_copts->{namespace} //= 'html-data';
 
+  my $cache = cache( $html_copts );
+  my $d = $cache->get( $url );
+
+  unless ( defined $d ) {
+    my $d = _get_url( $url, $cache_opts );
+    $cache->set( $url, $d );
+  }
+
+  require HTML5::DOM;
   my $parser = HTML5::DOM->new;
-  return $parser->parse( $data );
+
+  $log->warn( "Converting response content to dom object" );
+  return $parser->parse( $d );
+}
+
+#----------------------------------------------------------------------------
+
+=head2 get_jar
+
+=over
+
+=item Required: E<36>url E<36>file
+
+=back
+
+Get's a jar file from C<url> and saves it in C<file>.
+
+=cut
+
+sub get_jar {
+  my ( $url, $file ) = @_;
+
+  require LWP::Simple;
+  LWP::Simple->import;
+  my $rc = getstore( $url, $file );
+
+  die "Got error $rc when trying to download $url"
+    if is_error($rc);
+
+  return 1;
 }
 
 1;
