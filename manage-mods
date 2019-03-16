@@ -7,9 +7,10 @@ BEGIN {
   use FindBin '$RealScript';
   use File::Basename;
 
-  $ENV{MANAGE_MOD_BASENAME} = basename( $RealScript );
-  $ENV{MANAGE_MOD_VERSION} = '0.01';
-  $ENV{MANAGE_MOD_CACHE_DIR} = "$ENV{HOME}/.cache/$ENV{MANAGE_MOD_BASENAME}";
+  $ENV{MANAGE_MOD_VERSION}     = '0.01';
+  $ENV{MANAGE_MOD_BASENAME}    = basename( $RealScript );
+  $ENV{MANAGE_MOD_CACHE_DIR} //= "$ENV{HOME}/.cache/$ENV{MANAGE_MOD_BASENAME}";
+  $ENV{MANAGE_MOD_AGENT}     //= "HarleyPig's Mod Manager/$ENV{MANAGE_MOD_VERSION}";
 
   [[ -d $ENV{MANAGE_MOD_CACHE_DIR} ]]
     or mkdir $ENV{MANAGE_MOD_CACHE_DIR}
@@ -19,13 +20,20 @@ BEGIN {
 use lib "$ENV{MANAGE_MOD_BASENAME}/lib";
 
 use Log::Any::Adapter;
-use ManageMod::GetMod;
+use ManageMod::GetModInfo;
 
 #Log::Any::Adapter->set( 'File', "$HOME/.local/$ENV{BASENAME}" );
 Log::Any::Adapter->set( 'File', "$ENV{MANAGE_MOD_BASENAME}.log" );
 
 my $data = get_mod_info('jei', '1.12.2', 'release,beta');
 
-#use JSON;
-#my $json = JSON->new;
-#print $json->pretty->encode($data);
+print '?';
+
+# What mod?
+# What version of minecraft?
+# What channels?
+# Get mod info.
+# Does jar already exist?
+#  Download jar
+# Does jar match md5sum?
+#

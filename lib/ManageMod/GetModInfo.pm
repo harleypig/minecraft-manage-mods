@@ -7,7 +7,6 @@ use parent "Exporter::Tiny";
 
 our @EXPORT = qw(get_mod_info);
 
-use Digest::MD5;
 use Log::Any '$log';
 use Time::Piece;
 
@@ -18,14 +17,6 @@ my $API_BASE_URL  = 'https://api.cfwidget.com/mc-mods/minecraft';
 my $PROJECT_BASE_URL = 'https://minecraft.curseforge.com/projects';
 my $FILE_BASE_URL = 'https://minecraft.curseforge.com/projects/%MODNAME%/files';
 my $DL_BASE_URL   = 'https://www.curseforge.com/minecraft/mc-mods/jei/download/%MODID%/file';
-
-sub _check_md5sum {
-  my $filename = shift || "/etc/passwd";
-  open (my $fh, '<', $filename) or die "Can't open '$filename': $!";
-  binmode ($fh);
-
-  print Digest::MD5->new->addfile($fh)->hexdigest, $filename;
-}
 
 sub get_mod_info {
   my ( $modname, $mc_version, $channels ) = @_;
@@ -51,12 +42,12 @@ sub get_mod_info {
 
   return $modinfo if defined $modinfo;
 
+  $log->debug('modinfo cache expired or not there, freshening data');
+
   my $data = get_json( "$API_BASE_URL/$modname" );
 
-  unless ( exists $data->{versions}{$mc_version} ) {
-    warn $log->warnf( 'MC Version %s does not exist in data for %s', $mc_version, $modname );
-    return 1;
-  }
+  die $log->fatalf( 'MC Version %s does not exist in data for %s', $mc_version, $modname )
+    unless exists $data->{versions}{$mc_version};
 
   $channels = 'alpha|beta|release' if $channels =~ /any/i;
   $channels = lc $channels;
@@ -85,9 +76,8 @@ sub get_mod_info {
   $file_info_url =~ s/%MODNAME%/$modname/;
   $file_info_url .= "/$modinfo->{modid}";
 
-  my $html = get_html( $file_info_url );
-
-  my $md5sum   = $html->findClass( 'md5' )->text;
+  my $html   = get_html( $file_info_url );
+  my $md5sum = $html->findClass( 'md5' )->text;
 
   die $log->fatalf( 'Could not find md5sum on files page for %s', $modname )
     if $md5sum eq '';
@@ -110,11 +100,9 @@ sub get_mod_info {
   $modinfo->{md5sum} = $md5sum;
   $modinfo->{download} = $download_url;
 
-  $DB::single = 1;
+  $cache->set( $cache_key, $modinfo );
 
-  print '?';
-
-
+  return $modinfo;
 } ## end sub get_mod
 
 1;

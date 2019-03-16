@@ -63,6 +63,8 @@ sub _get_url {
   my $data  = $cache->get( $url );
 
   unless ( defined $data ) {
+    $log->debug('url cache expired or not there, freshening data');
+
     require LWP::UserAgent;
     require HTTP::Request;
 
@@ -114,6 +116,8 @@ sub get_json {
   my $data  = $cache->get( $url );
 
   unless ( defined $data ) {
+    $log->debug('json cache expired or not there, freshening data');
+
     $data = _get_url( $url, $cache_opts );
 
     require JSON;
@@ -154,6 +158,7 @@ sub get_html {
   my $d = $cache->get( $url );
 
   unless ( defined $d ) {
+    $log->debug('html cache expired or not there, freshening data');
     my $d = _get_url( $url, $cache_opts );
     $cache->set( $url, $d );
   }
@@ -180,16 +185,36 @@ Get's a jar file from C<url> and saves it in C<file>.
 =cut
 
 sub get_jar {
-  my ( $url, $file ) = @_;
+  my ( $url, $file, $md5sum ) = @_;
+
+  $log->debug('downloading jarfile');
 
   require LWP::Simple;
   LWP::Simple->import;
   my $rc = getstore( $url, $file );
 
-  die "Got error $rc when trying to download $url"
-    if is_error($rc);
+  if ( is_error($rc) ) {
+    warn $log->fatalf('Got error %s when trying to download %s', $rc, $url);
+    return 0;
+  }
 
-  return 1;
+  require Digest::MD5;
+
+  if ( open my $fh, '<', $file ) {
+    binmode ($fh);
+
+    my $digest = Digest::MD5->new->addfile($fh)->hexdigest;
+
+    if ( $digest ne $md5sum ) {
+      warn $log->fatalf('md5sum for %s does not match expected md5sum', $file);
+      return 0;
+    }
+
+    return 1;
+  }
+
+  warn $log->fatalf('Cannot open "%s": %s', $file, "$!");
+  return 0;
 }
 
 1;
