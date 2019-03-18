@@ -13,10 +13,11 @@ use Time::Piece;
 use ManageMod::GetData;
 use ManageMod::Cache;
 
-my $API_BASE_URL  = 'https://api.cfwidget.com/mc-mods/minecraft';
+my $API_BASE_URL     = 'https://api.cfwidget.com/mc-mods/minecraft';
 my $PROJECT_BASE_URL = 'https://minecraft.curseforge.com/projects';
-my $FILE_BASE_URL = 'https://minecraft.curseforge.com/projects/%MODNAME%/files';
-my $DL_BASE_URL   = 'https://www.curseforge.com/minecraft/mc-mods/jei/download/%MODID%/file';
+my $FILE_BASE_URL    = 'https://minecraft.curseforge.com/projects/%MODNAME%/files';
+my $DL_BASE_URL      = 'https://www.curseforge.com/minecraft/mc-mods/jei/download/%MODID%/file';
+my $IN_QUEUE_SLEEP   = 30;
 
 sub get_mod_info {
   my ( $modname, $mc_version, $channels ) = @_;
@@ -45,6 +46,29 @@ sub get_mod_info {
   $log->debug('modinfo cache expired or not there, freshening data');
 
   my $data = get_json( "$API_BASE_URL/$modname" );
+
+  if ( exists $data->{error} ) {
+    $log->info($data);
+
+    if ( $data->{error} eq 'in_queue' ) {
+      warn $log->infof('Data request is pending, waiting for %s seconds before trying again.', $IN_QUEUE_SLEEP);
+      sleep $IN_QUEUE_SLEEP;
+      $data = get_json( "$API_BASE_URL/$modname" );
+
+      if ( exists $data->{error} ) {
+        warn $log->info('Data request is still pending, giving up.');
+        return 1;
+      }
+
+    elsif ( $data->{error} =~ /not_found|invalid_path/ ) {
+      warn $log->infof('%s: %s', $data->{title}, $data->{message});
+      return 1;
+
+    } else {
+      warn $log->fatal('Unknown error, see log for details.');
+      return 1;
+    }
+  }
 
   die $log->fatalf( 'MC Version %s does not exist in data for %s', $mc_version, $modname )
     unless exists $data->{versions}{$mc_version};

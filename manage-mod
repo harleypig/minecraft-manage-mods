@@ -25,7 +25,18 @@ use ManageMod::GetModInfo;
 #Log::Any::Adapter->set( 'File', "$HOME/.local/$ENV{BASENAME}" );
 Log::Any::Adapter->set( 'File', "$ENV{MANAGE_MOD_BASENAME}.log" );
 
-my $data = get_mod_info('jei', '1.12.2', 'release,beta');
+# !!! Need to account for projects not in minecraft.curseforge.com but are in
+# curseforge.com/minecraft.
+
+# Worlds: skyblock-3
+# Modpacks: stoneblock
+# Customization: astral-lucky-blocks
+# Addons: minecraft-font
+# Mods: jei
+# Texture Packs: faithful-x32
+
+#my $data = get_mod_info('jei', '1.12.2', 'release,beta');
+my $data = get_mod_info('orelib', '1.12.2', 'release,beta');
 
 print '?';
 

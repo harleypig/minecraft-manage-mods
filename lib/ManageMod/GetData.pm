@@ -28,7 +28,7 @@ ManageMod::GetData - Gets data from E<36>url and caches it.
 #############################################################################
 use parent "Exporter::Tiny";
 
-our @EXPORT = qw(get_json get_html);
+our @EXPORT = qw(get_json get_html get_jar get_redirect);
 
 use Clone 'clone';
 use Log::Any '$log';
@@ -57,31 +57,32 @@ sub _get_url {
   $cache_opts->{label}     //= __PACKAGE__;
   $cache_opts->{namespace} //= 'raw-urls';
 
-  my $useragent = delete $cache_opts->{agent} || "HarleyPig's Mod Manager/$ENV{MANAGE_MOD_VERSION}";
-
   my $cache = cache( $cache_opts );
   my $data  = $cache->get( $url );
+
+  my $rc=0;
+  my $rc_message='found in cache';
 
   unless ( defined $data ) {
     $log->debug('url cache expired or not there, freshening data');
 
     require LWP::UserAgent;
-    require HTTP::Request;
 
     my $ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => 1 } );
-    $ua->agent( $useragent );
+    $ua->agent($ENV{MANAGE_MOD_AGENT});
 
     my $header   = HTTP::Request->new( GET => $url );
     my $request  = HTTP::Request->new( 'GET', $url, $header );
     my $response = $ua->request( $request );
 
-    # XXX: need to handle errors here
+    $rc         = $response->code;
+    $rc_message = $response->message;
+    $data       = $response->content;
 
-    $data = $response->content;
     $cache->set( $url, $data );
   }
 
-  return $data;
+  return $data, $rc, $rc_message;
 } ## end sub _get_url
 
 #############################################################################
@@ -118,15 +119,24 @@ sub get_json {
   unless ( defined $data ) {
     $log->debug('json cache expired or not there, freshening data');
 
-    $data = _get_url( $url, $cache_opts );
+    ( $data, $rc, $message ) = _get_url( $url, $cache_opts );
 
     require JSON;
     my $json = JSON->new;
 
-    $log->warn( "Converting response content to json object" );
+    $log->warn('Converting response content to json object' );
     $data = $json->decode( $data );
+
+    if ( exists $data->{error} ) {
+      $data->{response_code} = $rc;
+      $data->{repsonse_code_message} = $message;
+      return $data;
+    }
+
     $cache->set( $url, $data );
   }
+
+  $DB::single = 1;
 
   return $data;
 } ## end sub get_json
@@ -159,7 +169,13 @@ sub get_html {
 
   unless ( defined $d ) {
     $log->debug('html cache expired or not there, freshening data');
-    my $d = _get_url( $url, $cache_opts );
+    my ( $d, $rc, $message ) = _get_url( $url, $cache_opts );
+
+    if ( $rc != 200 ) {
+      warn $log->info('Non 200 return code from url');
+      return $d, $rc, $message;
+    }
+
     $cache->set( $url, $d );
   }
 
@@ -215,6 +231,40 @@ sub get_jar {
 
   warn $log->fatalf('Cannot open "%s": %s', $file, "$!");
   return 0;
+}
+
+#----------------------------------------------------------------------------
+
+=head2 get_redirect
+
+=over
+
+=item Required: E<36>url E<36>file
+
+=back
+
+Get's the final url from a redirected url.
+
+=cut
+
+sub get_redirect {
+  my ( $url ) = @_;
+
+  require LWP::UserAgent;
+
+  my $ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => 1 } );
+  $ua->agent($ENV{MANAGE_MOD_AGENT});
+
+  my $header   = HTTP::Request->new( GET => $url );
+  my $request  = HTTP::Request->new( 'GET', $url, $header );
+  my $response = $ua->request( $request );
+
+  if ( $response->code != 200 ) {
+    warn $log->infof('Non 200 response code from $url (%s: %s)', $response->code, $response->message);
+    return 0;
+  }
+
+  return $response->request->uri;
 }
 
 1;
