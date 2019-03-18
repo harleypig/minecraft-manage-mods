@@ -75,7 +75,8 @@ sub base_info {
   }
 
   my $modurl = "$PROJECT_BASE_URL/$modname";
-  my $html   = get_html( $modurl );
+  my ( $html, $rc, $message ) = get_html( $modurl );
+  return 1 unless $rc == 200 || $rc == 0;
 
   #----------------------------------------------------------------------
   # XXX: Handle errors
@@ -217,32 +218,18 @@ sub base_info {
 # Get information from files page.
 
 ##############################################################################
-# Get information from dependencies page.
+# Get information from relations pages.
 
-sub get_dependencies {
-  return 1;
-}
-
-##############################################################################
-# Get information from dependents page.
-
-sub get_dependents {
-  my ( $modname, $moddata ) = @_;
-
-  $moddata //= {};
-
-  if ( ref $moddata ne 'HASH' ) {
-    warn $log->fatal('moddata is not a hash ref');
-    return 0;
-  }
-
-  my $dependent_url = "$PROJECT_BASE_URL/$modname/relations/dependents?page=";
+sub _get_relations {
+  my ( $relation_url ) = @_;
 
   #----------------------------------------------------------------------
   # CurseForge doesn't return an error when requesting a page that doesn't
   # exist, so we have to find out how many pages there are.
 
-  my $html      = get_html("${dependent_url}1");
+  my ( $html, $rc, $message ) = get_html("${relation_url}1");
+  return 1 unless $rc == 200 || $rc == 0;
+
   my $pagelinks = $html->findClass('b-pagination-item')->array;
   my $maxpages  = 1;
 
@@ -257,7 +244,7 @@ sub get_dependents {
     }
   }
 
-  my @dependents = ();
+  my @relations = ();
 
   for my $p ( 1 .. $maxpages ) {
     my $lis = $html->findClass('project-list-item')->array;
@@ -273,19 +260,61 @@ sub get_dependents {
       ( $pli->{project} = $p->getAttribute('href') ) =~ s#^.*/##;
       ( $pli->{name} = $p->text ) =~ s/^\s*(.*?)\s*$/$1/;
 
-      push @dependents, { %$pli };
+      push @relations, { %$pli };
     }
 
     if ( $p > 1 ) {
-      $log->infof('Waiting %s second before getting page %s', $RELATIONS_SLEEP, $p);
-      sleep $RELATIONS_SLEEP;
-      $html = get_html("${dependent_url}$p");
+      if ( $rc != 0 ) {
+        $log->infof('Waiting %s second before getting page %s', $RELATIONS_SLEEP, $p);
+        sleep $RELATIONS_SLEEP;
+      }
+
+      ( $html, $rc, $message ) = get_html("${relation_url}$p");
+      return 1 unless $rc == 200 || $rc == 0;
     }
   }
 
-  $moddata->{dependents} = \@dependents;
+  return \@relations;
+}
 
-  return 1;
+##############################################################################
+# Get information from dependencies page.
+
+sub get_dependencies {
+  my ( $modname, $moddata ) = @_;
+
+  $moddata //= {};
+
+  if ( ref $moddata ne 'HASH' ) {
+    warn $log->fatal('moddata is not a hash ref');
+    return 0;
+  }
+
+  my $dependency_url = "$PROJECT_BASE_URL/$modname/relations/dependencies?page=";
+
+  $moddata->{dependencies} = _get_relations($dependency_url);
+
+  return 0;
+}
+
+##############################################################################
+# Get information from dependencies page.
+
+sub get_dependents {
+  my ( $modname, $moddata ) = @_;
+
+  $moddata //= {};
+
+  if ( ref $moddata ne 'HASH' ) {
+    warn $log->fatal('moddata is not a hash ref');
+    return 0;
+  }
+
+  my $dependent_url = "$PROJECT_BASE_URL/$modname/relations/dependents?page=";
+
+  $moddata->{dependents} = _get_relations($dependent_url);
+
+  return 0;
 }
 
 ##############################################################################
@@ -307,6 +336,7 @@ sub get_mod_info {
 
   base_info( $modname, $moddata );
   get_dependents( $modname, $moddata );
+  get_dependencies( $modname, $moddata );
   my $gooddata = check_moddata( $moddata );
   $DB::single = 1;
   print '?';
@@ -380,7 +410,9 @@ sub get_mod_info {
   $file_info_url =~ s/%MODNAME%/$modname/;
   $file_info_url .= "/$modinfo->{modid}";
 
-  my $html   = get_html( $file_info_url );
+  my ( $html, $rc, $message ) = get_html( $file_info_url );
+  return 1 unless $rc == 200 || $rc == 0;
+
   my $md5sum = $html->findClass( 'md5' )->text;
 
   die $log->fatalf( 'Could not find md5sum on files page for %s', $modname )

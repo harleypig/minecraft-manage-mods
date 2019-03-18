@@ -61,7 +61,7 @@ sub _get_url {
   my $data  = $cache->get( $url );
 
   my $rc=0;
-  my $rc_message='found in cache';
+  my $message='found in cache';
 
   unless ( defined $data ) {
     $log->debug('url cache expired or not there, freshening data');
@@ -75,17 +75,19 @@ sub _get_url {
     my $request  = HTTP::Request->new( 'GET', $url, $header );
     my $response = $ua->request( $request );
 
-    $rc         = $response->code;
-    $rc_message = $response->message;
-    $data       = $response->content;
+    $rc      = $response->code;
+    $message = $response->message;
+    $data    = $response->content;
 
-    return $data, $rc, $rc_message
-      if $rc != 200;
+    if ( $rc != 200 ) {
+      warn $log->fatalf('%s (%s)', $message, $rc);
+      return $data, $rc, $message
+    }
 
     $cache->set( $url, $data );
   }
 
-  return $data, $rc, $rc_message;
+  return $data, $rc, $message;
 } ## end sub _get_url
 
 #############################################################################
@@ -168,19 +170,18 @@ sub get_html {
   $html_copts->{label}     //= __PACKAGE__;
   $html_copts->{namespace} //= 'html-data';
 
-  my $cache = cache( $html_copts );
-  my $d = $cache->get( $url );
-  my $rc = 0;
+  my $cache   = cache( $html_copts );
+  my $d       = $cache->get( $url );
+
+  my $rc      = 0;
   my $message = 'found in cache';
 
   unless ( defined $d ) {
     $log->debug('html cache expired or not there, freshening data');
     ( $d, $rc, $message ) = _get_url( $url, $cache_opts );
 
-    if ( $rc != 200 ) {
-      warn $log->info('Non 200 return code from url');
-      return $d, $rc, $message;
-    }
+    return $d, $rc, $message
+      unless $rc == 200;
 
     $cache->set( $url, $d );
   }
