@@ -79,6 +79,9 @@ sub _get_url {
     $rc_message = $response->message;
     $data       = $response->content;
 
+    return $data, $rc, $rc_message
+      if $rc != 200;
+
     $cache->set( $url, $data );
   }
 
@@ -119,6 +122,7 @@ sub get_json {
   unless ( defined $data ) {
     $log->debug('json cache expired or not there, freshening data');
 
+    my ( $rc, $message );
     ( $data, $rc, $message ) = _get_url( $url, $cache_opts );
 
     require JSON;
@@ -166,10 +170,12 @@ sub get_html {
 
   my $cache = cache( $html_copts );
   my $d = $cache->get( $url );
+  my $rc = 0;
+  my $message = 'found in cache';
 
   unless ( defined $d ) {
     $log->debug('html cache expired or not there, freshening data');
-    my ( $d, $rc, $message ) = _get_url( $url, $cache_opts );
+    ( $d, $rc, $message ) = _get_url( $url, $cache_opts );
 
     if ( $rc != 200 ) {
       warn $log->info('Non 200 return code from url');
@@ -183,7 +189,7 @@ sub get_html {
   my $parser = HTML5::DOM->new;
 
   $log->warn( "Converting response content to dom object" );
-  return $parser->parse( $d );
+  return $parser->parse( $d ), $rc, $message;
 }
 
 #----------------------------------------------------------------------------

@@ -20,7 +20,7 @@ BEGIN {
 use lib "$ENV{MANAGE_MOD_BASENAME}/lib";
 
 use Log::Any::Adapter;
-use ManageMod::GetModInfo;
+use ManageMod::CurseForge::GetModInfo;
 
 #Log::Any::Adapter->set( 'File', "$HOME/.local/$ENV{BASENAME}" );
 Log::Any::Adapter->set( 'File', "$ENV{MANAGE_MOD_BASENAME}.log" );
