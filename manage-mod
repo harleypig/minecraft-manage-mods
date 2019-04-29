@@ -23,7 +23,7 @@ use Log::Any::Adapter;
 use ManageMod::CurseForge::GetModInfo;
 
 #Log::Any::Adapter->set( 'File', "$HOME/.local/$ENV{BASENAME}" );
-Log::Any::Adapter->set( 'File', "$ENV{MANAGE_MOD_BASENAME}.log" );
+Log::Any::Adapter->set( 'File', "$ENV{MANAGE_MOD_BASENAME}.log", log_level => 'info' );
 
 # !!! Need to account for projects not in minecraft.curseforge.com but are in
 # curseforge.com/minecraft.

@@ -1,5 +1,7 @@
 package ManageMod::GetData;
 
+## no critic
+
 use v5.10;
 
 use strict;
@@ -64,7 +66,7 @@ sub _get_url {
   my $message='found in cache';
 
   unless ( defined $data ) {
-    $log->debug('url cache expired or not there, freshening data');
+    $log->info('url cache expired or not there, freshening data');
 
     require LWP::UserAgent;
 
@@ -122,7 +124,7 @@ sub get_json {
   my $data  = $cache->get( $url );
 
   unless ( defined $data ) {
-    $log->debug('json cache expired or not there, freshening data');
+    $log->info('json cache expired or not there, freshening data');
 
     my ( $rc, $message );
     ( $data, $rc, $message ) = _get_url( $url, $cache_opts );
@@ -130,7 +132,7 @@ sub get_json {
     require JSON;
     my $json = JSON->new;
 
-    $log->warn('Converting response content to json object' );
+    $log->info('Converting response content to json object' );
     $data = $json->decode( $data );
 
     if ( exists $data->{error} ) {
@@ -141,8 +143,6 @@ sub get_json {
 
     $cache->set( $url, $data );
   }
-
-  $DB::single = 1;
 
   return $data;
 } ## end sub get_json
@@ -173,11 +173,11 @@ sub get_html {
   my $cache   = cache( $html_copts );
   my $d       = $cache->get( $url );
 
-  my $rc      = 0;
+  my $rc      = 200;
   my $message = 'found in cache';
 
   unless ( defined $d ) {
-    $log->debug('html cache expired or not there, freshening data');
+    $log->info('html cache expired or not there, freshening data');
     ( $d, $rc, $message ) = _get_url( $url, $cache_opts );
 
     return $d, $rc, $message
@@ -189,7 +189,7 @@ sub get_html {
   require HTML5::DOM;
   my $parser = HTML5::DOM->new;
 
-  $log->warn( "Converting response content to dom object" );
+  $log->info( "Converting response content to dom object" );
   return $parser->parse( $d ), $rc, $message;
 }
 
@@ -210,7 +210,7 @@ Get's a jar file from C<url> and saves it in C<file>.
 sub get_jar {
   my ( $url, $file, $md5sum ) = @_;
 
-  $log->debug('downloading jarfile');
+  $log->info('downloading jarfile');
 
   require LWP::Simple;
   LWP::Simple->import;
@@ -267,7 +267,7 @@ sub get_redirect {
   my $response = $ua->request( $request );
 
   if ( $response->code != 200 ) {
-    warn $log->infof('Non 200 response code from $url (%s: %s)', $response->code, $response->message);
+    warn $log->fatalf('Non 200 response code from $url (%s: %s)', $response->code, $response->message);
     return 0;
   }
 
