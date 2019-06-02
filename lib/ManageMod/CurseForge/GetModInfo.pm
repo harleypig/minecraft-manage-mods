@@ -34,8 +34,6 @@ my $SCRAPE_URL1 = "$GAME_CF_URL/projects";
 my $SCRAPE_URL2 = "$MAIN_CF_URL/projects";
 
 my $PROJECT_BASE_URL = $SCRAPE_URL1;
-my $FILE_BASE_URL    = "$PROJECT_BASE_URL/%MODNAME%/files";
-my $DL_BASE_URL      = "$PROJECT_BASE_URL/minecraft/mc-mods/%MODNAME%/download/%MODID%/file";
 
 my $IN_QUEUE_SLEEP    = 30;
 my $IN_QUEUE_ATTEMPTS = 3;
@@ -95,15 +93,15 @@ sub _array_check {
 
   if ( @$arr > 1 ) {
     warn $log->infof( 'Unexpected %s count in base page, assuming first entry', $check );
-    return 1;
+    return 0;
   }
 
   if ( @$arr < 1 ) {
     warn $log->infof( 'No %s found, did they change things?', $check );
-    return 1;
+    return 0;
   }
 
-  return 0;
+  return 1;
 } ## end sub _array_check
 
 # Try MOD_API1_URL, then MOD_API2_URL, then try to find and scrape the project page.
@@ -176,7 +174,6 @@ sub _get_html {
   #----------------------------------------------------------------------
   # About This Project
   # Project ID, Downloads, Created, Last Released
-
   my $info = $html->findClass( 'info-label' )->array;
 
   warn $log->info( 'No info label entries found in base page, did they change things?' )
@@ -195,55 +192,27 @@ sub _get_html {
 
   #----------------------------------------------------------------------
   # Title
-
   my $title = $html->findAttr( 'property', 'og:title' )->array;
-
-#  warn $log->info( 'Unexpected title count in base page, assuming first entry' )
-#    if @$title > 1;
-#
-#  if ( @$title < 1 ) {
-#    warn $log->info( 'No title found, did they change things?' );
-#
-#  } else {
-#    $data->{title} = $title->[0]->attr( 'content' );
-#  }
 
   $data->{title} = $title->[0]->attr( 'content' )
     if _array_check( $title, 'title' );
 
   #----------------------------------------------------------------------
   # Description
-
   my $desc = $html->findClass( 'project-description' )->array;
 
-  warn $log->info( 'Unexpected description count in base page, assuming first entry' )
-    if @$desc > 1;
-
-  if ( @$desc < 1 ) {
-    warn $log->info( 'No description found, did they change things?' );
-
-  } else {
-    ( $data->{description} = $desc->[0]->text ) =~ s/^\s+(.*?)\s+$/$1/;
-  }
+  ( $data->{description} = $desc->[0]->text ) =~ s/^\s+(.*?)\s+$/$1/
+    if _array_check( $desc, 'description' );
 
   #----------------------------------------------------------------------
   # Type (Mods, Resource Pack, Texture Pack)
-
   my $type = $html->findClass( 'RootGameCategory' )->array;
 
-  warn $log->info( 'Unexpected type count in base page, assuming first entry' )
-    if @$type > 1;
-
-  if ( @$type < 1 ) {
-    warn $log->info( 'No type found, did they change things?' );
-
-  } else {
-    ( $data->{type} = $type->[0]->text ) =~ s/^\s*(.*?)\s*$/\L$1/;
-  }
+  ( $data->{type} = $type->[0]->text ) =~ s/^\s*(.*?)\s*$/\L$1/
+    if _array_check( $type, 'type' );
 
   #----------------------------------------------------------------------
   # Issues and Source
-
   my $links = $html->findTag( 'a' )->array;
 
   for my $a ( @$links ) {
@@ -258,57 +227,30 @@ sub _get_html {
   # Project URL
   my $project_url = $html->findAttr( 'property', 'og:url' )->array;
 
-  warn $log->info( 'Unexpected og:url count in base page, assuming first entry' )
-    if @$project_url > 1;
-
-  if ( @$project_url < 1 ) {
-    warn $log->info( 'No og:url found, did they change things?' );
-
-  } else {
-    $data->{links}{project} = $project_url->[0]->attr( 'content' );
-  }
+  $data->{links}{project} = $project_url->[0]->attr( 'content' )
+    if _array_check( $project_url, 'project url' );
 
   #----------------------------------------------------------------------
   # CurseForge URL
   my $cf_url = $html->findClass( 'view-on-curse' )->array;
 
-  warn $log->info( 'Unexpected view-on-curse count in base page, assuming first entry' )
-    if @$project_url > 1;
-
-  if ( @$project_url < 1 ) {
-    warn $log->info( 'No view-on-curse found, did they change things?' );
-
-  } else {
-    $data->{links}{curseforge} = $cf_url->[0]->findTag( 'a' )->array->[0]->attr( 'href' );
-  }
+  $data->{links}{curseforge} = $cf_url->[0]->findTag( 'a' )->array->[0]->attr( 'href' )
+    if _array_check( $cf_url, 'view-on-curse' );
 
   #----------------------------------------------------------------------
   # Thumbnail
 
   my $thumb = $html->findClass( 'e-avatar64' )->array;
 
-  warn $log->info( 'Unexpected thumbnail count in base page, assuming first entry' )
-    if @$thumb > 1;
-
-  if ( @$thumb < 1 ) {
-    warn $log->info( 'No thumbnail found, did they change things?' );
-
-  } else {
-    $data->{links}{thumbnail} = $thumb->[0]->attr( 'href' );
-  }
+  $data->{links}{thumbnail} = $thumb->[0]->attr( 'href' )
+    if _array_check( $thumb, 'thumbnail' );
 
   #----------------------------------------------------------------------
   # Project License
 
   my $license = $html->findAttr( 'data-title', 'Project License' )->array;
 
-  warn $log->info( 'Unexpected Project License count in base page, assuming first entry' )
-    if @$license > 1;
-
-  if ( @$license < 1 ) {
-    warn $log->info( 'No Project License found in base page, did they change things?' );
-
-  } else {
+  if ( _array_check( $license, 'license' ) ) {
     my $l = $license->[0];
 
     my $license_text;
@@ -318,6 +260,7 @@ sub _get_html {
 
     if ( $license_url =~ m#^/# ) {
       $license_url = "$GAME_CF_URL$license_url";
+
     } elsif ( $license_url !~ /^https?/ ) {
       $license_url = "${data}{links}{project}/$license_url";
     }
@@ -330,13 +273,7 @@ sub _get_html {
 
   my $categories = $html->findClass( 'project-categories' )->array;
 
-  warn $log->info( 'Unexpected Categories count in base page, assuming first entry' )
-    if @$categories > 1;
-
-  if ( @$categories < 1 ) {
-    warn $log->info( 'No categories found in base page, did they change things?' );
-
-  } else {
+  if ( _array_check( $categories, 'categories' ) ) {
     my $li = $categories->[0]->findTag( 'li' )->array;
 
     if ( @$li < 1 ) {
@@ -348,37 +285,28 @@ sub _get_html {
     }
   }
 
-  $DB::single = 1;
-  print '?';
+  #----------------------------------------------------------------------
+  # Members
 
-#  #----------------------------------------------------------------------
-#  # Members
-#
-#  my $members = $html->findClass('project-members')->array;
-#
-#  warn $log->info('Unexpected Project Members count in base page, did they change things?')
-#    if @$members > 1;
-#
-#  if ( @$members < 1 ) {
-#    warn $log->info('No Members found in base page, did they change things?');
-#
-#  } else {
-#    my $li = $members->[0]->findTag('li')->array;
-#
-#    if ( @$li < 1 ) {
-#      warn $log->info('No members found in list, did they change things?');
-#
-#    } else {
-#      $data->{members} //= ();
-#
-#      for my $m ( @$li ) {
-#        ( my $member =  $m->findTag('a')->array->[0]->getAttribute('href') ) =~ s#/members/##;
-#        push @{$data->{members}}, $member;
-#      }
-#    }
-#  }
-#
-#
+  my $members = $html->findClass( 'project-members' )->array;
+
+  if ( _array_check( $members, 'members' ) ) {
+    my $li = $members->[0]->findTag( 'li' )->array;
+
+    if ( @$li < 1 ) {
+      warn $log->info( 'No members found in list, did they change things?' );
+
+    } else {
+      $data->{members} //= ();
+
+      for my $m ( @$li ) {
+        ( my $member = $m->findTag( 'a' )->array->[0]->getAttribute( 'href' ) ) =~ s#/members/##;
+        push @{ $data->{members} }, $member;
+      }
+    }
+  }
+
+  return $data;
 } ## end sub _get_html
 
 #-----------------------------------------------------------------------------
@@ -395,13 +323,75 @@ sub _base_info {
   my $missing = _get_html( $modname )
     or return 0;
 
-  my $modinfo = merge $json, $missing;
+  my $data = merge $json, $missing;
 
-  return $modinfo;
-}
+  my @cleanup = qw(
+    created_at
+    download
+    thumbnail
+    urls
+    versions
+  );
+
+  delete $data->{$_} for @cleanup;
+
+  # Fix the timestamps and add urls in files and versions.
+  for my $f ( @{ $data->{files} } ) {
+    $f->{epoch}        = Time::Piece->strptime( delete $f->{uploaded_at}, '%Y-%m-%dT%H:%M:%SZ' )->[9];
+    $f->{files_url}    = "$PROJECT_BASE_URL/$modname/files/$f->{id}";
+    $f->{download_url} = "$f->{files_url}/download";
+
+    for my $v ( @{ $f->{versions} } ) {
+      my $ver = $data->{versions}{$v} //= [];
+      push @$ver, $f;
+    }
+  }
+
+  return $data;
+} ## end sub _base_info
 
 ##############################################################################
 # Get information from files page.
+
+sub _file_info {
+  my ( $modname, $url ) = @_;
+
+  my ( $html, $rc, $message ) = get_html( $url );
+
+  if ( $rc != 200 ) {
+    $log->fatalf( 'Status code was not 200: %s %s', $rc, $message );
+    return 0;
+  }
+
+  my $md5sum = $html->findClass( 'md5' )->text;
+
+  if ( $md5sum eq '' ) {
+    $log->fatalf( 'Could not find md5sum on files page for %s', $modname );
+    return 0;
+  }
+
+  my $label    = $html->findClass( 'info-label' )->array;
+  my $filename = '';
+
+  for my $l ( @$label ) {
+    if ( $l->text eq 'Filename' ) {
+      $filename = $l->next->text;
+      last;
+    }
+  }
+
+  if ( $filename eq '' ) {
+    $log->fatalf( 'Could not find filename on files page for %s', $modname );
+    return 0;
+  }
+
+  my $data = {};
+
+  $data->{md5sum}   = $md5sum;
+  $data->{filename} = $filename;
+
+  return $data;
+} ## end sub _file_info
 
 ##############################################################################
 # Get information from relations pages.
@@ -502,83 +492,49 @@ sub get_mod_info {
   my $cache_opts = {};
 
   $cache_opts->{label}     = __PACKAGE__;
-  $cache_opts->{namespace} = 'modinfo';
+  $cache_opts->{namespace} = 'data';
 
   my $cache_key = "$modname - $mcversion - $channels";
 
-  my $cache   = cache( $cache_opts );
-  my $modinfo = $cache->get( $cache_key );
+  my $cache = cache( $cache_opts );
+  my $data  = $cache->get( $cache_key );
 
-  return $modinfo if defined $modinfo;
+  return $data if defined $data;
 
-  $log->debug( 'modinfo cache expired or not there, freshening data' );
+  $log->debug( 'data cache expired or not there, freshening data' );
 
-  $modinfo = { 'updated' => time };
-
-  $modinfo = merge $modinfo, _base_info( $modname );
-
-  # Too many requests, will get blocked.
-  #_get_dependents( $modname );
-
-  $modinfo->{dependencies} = _get_dependencies( $modname );
-
-  #my $gooddata = _check_modinfo( $modinfo );
-
-  die $log->fatalf( 'MC Version %s does not exist in data for %s', $mcversion, $modname )
-    unless exists $modinfo->{versions}{$mcversion};
-
-  # Ignore channels (types) we aren't interested in, add an 'epoch' entry for
-  # the 'uploaded_at' field and, finally, sort the array so the latest mod is
-  # the first element.
-
-  my @v = sort { $b->{epoch} <=> $a->{epoch} }
-    map { $_->{epoch} = Time::Piece->strptime( $_->{uploaded_at}, '%Y-%m-%dT%H:%M:%SZ' )->epoch; $_ }
-    grep { $_->{type} =~ /^($channels)$/ } @{ $modinfo->{versions}{$mcversion} };
-
-  $modinfo = {
-    channels  => $channels,
-    epoch     => $v[0]->{epoch},
-    jarname   => $v[0]->{name},
-    mcversion => $mcversion,
-    modid     => $v[0]->{id},
-    modname   => $modname,
-    project   => "$PROJECT_BASE_URL/$modname",
-    type      => $v[0]->{type},
+  $data = {
+    'shortname' => $modname,
+    'mcversion' => $mcversion,
+    'channels'  => $channels,
+    'updated'   => time,
   };
 
-  my $file_info_url = $FILE_BASE_URL;
-  $file_info_url =~ s/%MODNAME%/$modname/;
-  $file_info_url .= "/$modinfo->{modid}";
+  $data = merge $data, _base_info( $modname );
 
-  my ( $html, $rc, $message ) = get_html( $file_info_url );
-  return 1 unless $rc == 200 || $rc == 0;
+  die $log->fatalf( 'MC Version %s does not exist in data for %s', $mcversion, $modname )
+    unless exists $data->{versions}{$mcversion};
 
-  my $md5sum = $html->findClass( 'md5' )->text;
+  # Too many requests, will get blocked.
+  #$data = merge $data, _get_dependents( $modname );
 
-  die $log->fatalf( 'Could not find md5sum on files page for %s', $modname )
-    if $md5sum eq '';
+  $data->{dependencies} = _get_dependencies( $modname );
 
-  my $label    = $html->findClass( 'info-label' )->array;
-  my $filename = '';
+  # Ignore channels (types) we aren't interested in, and sort the array so the
+  # latest mod is the first element.
 
-  for my $l ( @$label ) {
-    if ( $l->text eq 'Filename' ) {
-      $filename = $l->next->text;
-      last;
-    }
-  }
+  my @v = sort { $b->{epoch} <=> $a->{epoch} }
+    grep { $_->{type} =~ /^($channels)$/ } @{ $data->{versions}{$mcversion} };
 
-  die $log->fatalf( 'Could not find filename on files page for %s', $modname )
-    if $filename eq '';
+  $data->{download} = $v[0];
 
-  my $download_url = "$file_info_url/download";
+  my $meta = _file_info( $modname, $v[0]->{files_url} );
+  $v[0]->{md5}      = $meta->{md5};
+  $v[0]->{filename} = $meta->{filename};
 
-  $modinfo->{md5sum}   = $md5sum;
-  $modinfo->{download} = $download_url;
+  $cache->set( $cache_key, $data );
 
-  $cache->set( $cache_key, $modinfo );
-
-  return $modinfo;
+  return $data;
 } ## end sub get_mod_info
 
 1;

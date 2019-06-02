@@ -1,5 +1,7 @@
 #!/usr/bin/env perl
 
+## no critic
+
 use strict;
 use warnings;
 
@@ -21,9 +23,10 @@ use lib "$ENV{MANAGE_MOD_BASENAME}/lib";
 
 use Log::Any::Adapter;
 use ManageMod::CurseForge::GetModInfo;
+use YAML::Syck;
 
 #Log::Any::Adapter->set( 'File', "$HOME/.local/$ENV{BASENAME}" );
-Log::Any::Adapter->set( 'File', "$ENV{MANAGE_MOD_BASENAME}.log", log_level => 'info' );
+Log::Any::Adapter->set( 'File', "$ENV{MANAGE_MOD_BASENAME}.log", log_level => 'debug' );
 
 # !!! Need to account for projects not in minecraft.curseforge.com but are in
 # curseforge.com/minecraft.
@@ -35,10 +38,14 @@ Log::Any::Adapter->set( 'File', "$ENV{MANAGE_MOD_BASENAME}.log", log_level => 'i
 # Mods: jei
 # Texture Packs: faithful-x32
 
-#my $data = get_mod_info('jei', '1.12.2', 'release,beta');
-my $data = get_mod_info('orelib', '1.12.2', 'release,beta');
+my $mod = 'orelib';
+my $ver = '1.12.2';
+my $channels = 'release,beta';
 
-print '?';
+my $data = get_mod_info($mod, $ver, $channels);
+
+$YAML::Syck::SortKeys++;
+DumpFile("$mod.yml", $data);
 
 # What mod?
 # What version of minecraft?
