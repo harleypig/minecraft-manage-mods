@@ -1,5 +1,7 @@
 package ManageMod::Cache;
 
+## no critic
+
 use strict;
 use warnings;
 
@@ -49,8 +51,8 @@ use CHI;
 use Hash::Merge::Simple 'merge';
 use Log::Any '$log';
 
-our $DEFAULT_BASENAME  = $ENV{BASENAME} // 'manage-mods';
-our $DEFAULT_CACHE_DIR = "$ENV{HOME}/.cache/$DEFAULT_BASENAME";
+our $DEFAULT_BASENAME  = $ENV{MANAGE_MOD_BASENAME} // 'manage-mod';
+our $DEFAULT_CACHE_DIR = "$ENV{MANAGE_MOD_CACHE_DIR}" // "$ENV{HOME}/.cache/$DEFAULT_BASENAME";
 
 our $DEFAULT_CACHE_OPTS = {
   depth      => 2,

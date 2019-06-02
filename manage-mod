@@ -6,52 +6,62 @@ use strict;
 use warnings;
 
 BEGIN {
-  use FindBin '$RealScript';
+  use FindBin qw( $RealBin $RealScript );
   use File::Basename;
 
-  $ENV{MANAGE_MOD_VERSION}     = '0.01';
-  $ENV{MANAGE_MOD_BASENAME}    = basename( $RealScript );
+  $ENV{MANAGE_MOD_VERSION}  = '0.01';
+  $ENV{MANAGE_MOD_BASENAME} = basename( $RealScript );
   $ENV{MANAGE_MOD_CACHE_DIR} //= "$ENV{HOME}/.cache/$ENV{MANAGE_MOD_BASENAME}";
   $ENV{MANAGE_MOD_AGENT}     //= "HarleyPig's Mod Manager/$ENV{MANAGE_MOD_VERSION}";
 
-  [[ -d $ENV{MANAGE_MOD_CACHE_DIR} ]]
+  [ [ -d $ENV{MANAGE_MOD_CACHE_DIR} ] ]
     or mkdir $ENV{MANAGE_MOD_CACHE_DIR}
-      or die "Unable to create cache dir.";
+    or die "Unable to create cache dir.";
 }
 
-use lib "$ENV{MANAGE_MOD_BASENAME}/lib";
+use lib "$RealBin/lib";
 
+use Carp;
 use Log::Any::Adapter;
 use ManageMod::CurseForge::GetModInfo;
+use ManageMod::GetData;
 use YAML::Syck;
 
+#-----------------------------------------------------------------------------
 #Log::Any::Adapter->set( 'File', "$HOME/.local/$ENV{BASENAME}" );
 Log::Any::Adapter->set( 'File', "$ENV{MANAGE_MOD_BASENAME}.log", log_level => 'debug' );
 
-# !!! Need to account for projects not in minecraft.curseforge.com but are in
-# curseforge.com/minecraft.
+my $local_file_cache = "$ENV{MANAGE_MOD_CACHE_DIR}/files";
 
-# Worlds: skyblock-3
-# Modpacks: stoneblock
-# Customization: astral-lucky-blocks
-# Addons: minecraft-font
-# Mods: jei
-# Texture Packs: faithful-x32
+mkdir $local_file_cache
+  unless -d $local_file_cache;
 
-my $mod = 'orelib';
-my $ver = '1.12.2';
+#-----------------------------------------------------------------------------
+sub get_mod {
+  my ( $mod, $version, $channels ) = @_;
+
+  my $data = get_mod_info( $mod, $version, $channels );
+
+  croak unless exists $data->{download};
+
+  my $download_url = $data->{download}{download_url};
+  my $md5sum       = $data->{download}{md5sum};
+
+  my $local_file = "$local_file_cache/$data->{download}{filename}";
+
+  get_file( $download_url, $local_file, $md5sum )
+    or croak "Couldn't get $data->{download}{filename}";
+
+  # XXX: Need to allow for separate channels for dependencies ...
+  for my $depmod ( @{ $data->{dependencies} } ) {
+    get_mod( $depmod->{project}, $version, $channels );
+  }
+} ## end sub get_mod
+
+#-----------------------------------------------------------------------------
+
+my $mod      = 'dynamic-surroundings';
+my $ver      = '1.12.2';
 my $channels = 'release,beta';
 
-my $data = get_mod_info($mod, $ver, $channels);
-
-$YAML::Syck::SortKeys++;
-DumpFile("$mod.yml", $data);
-
-# What mod?
-# What version of minecraft?
-# What channels?
-# Get mod info.
-# Does jar already exist?
-#  Download jar
-# Does jar match md5sum?
-#
+my $data = get_mod( $mod, $ver, $channels );

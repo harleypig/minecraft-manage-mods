@@ -512,8 +512,10 @@ sub get_mod_info {
 
   $data = merge $data, _base_info( $modname );
 
-  die $log->fatalf( 'MC Version %s does not exist in data for %s', $mcversion, $modname )
-    unless exists $data->{versions}{$mcversion};
+  if ( !exists $data->{versions}{$mcversion} ) {
+    warn $log->fatalf( 'MC Version %s does not exist in data for %s', $mcversion, $modname );
+    return 0;
+  }
 
   # Too many requests, will get blocked.
   #$data = merge $data, _get_dependents( $modname );
@@ -529,7 +531,7 @@ sub get_mod_info {
   $data->{download} = $v[0];
 
   my $meta = _file_info( $modname, $v[0]->{files_url} );
-  $v[0]->{md5}      = $meta->{md5};
+  $v[0]->{md5sum}   = $meta->{md5sum};
   $v[0]->{filename} = $meta->{filename};
 
   $cache->set( $cache_key, $data );

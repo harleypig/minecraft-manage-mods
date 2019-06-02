@@ -7,6 +7,9 @@ use v5.10;
 use strict;
 use warnings;
 
+use LWP::UserAgent;
+use HTTP::Status;
+
 #############################################################################
 
 =head1 NAME
@@ -30,12 +33,31 @@ ManageMod::GetData - Gets data from E<36>url and caches it.
 #############################################################################
 use parent "Exporter::Tiny";
 
-our @EXPORT = qw(get_json get_html get_jar get_redirect);
+our @EXPORT = qw(get_json get_html get_file get_redirect);
 
 use Clone 'clone';
 use Log::Any '$log';
 
 use ManageMod::Cache;
+
+#############################################################################
+
+=head2 _ua
+
+XXX
+
+=cut
+
+our $_ua;
+
+sub _ua {
+  return $_ua if defined $_ua;
+
+  $_ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => 1 } );
+  $_ua->agent( $ENV{MANAGE_MOD_AGENT} );
+
+  return $_ua;
+}
 
 #############################################################################
 
@@ -68,14 +90,14 @@ sub _get_url {
   unless ( defined $data ) {
     $log->info( 'url cache expired or not there, freshening data' );
 
-    require LWP::UserAgent;
-
-    my $ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => 1 } );
-    $ua->agent( $ENV{MANAGE_MOD_AGENT} );
+    #    require LWP::UserAgent;
+    #
+    #    my $ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => 1 } );
+    #    $ua->agent( $ENV{MANAGE_MOD_AGENT} );
 
     my $header   = HTTP::Request->new( GET => $url );
     my $request  = HTTP::Request->new( 'GET', $url, $header );
-    my $response = $ua->request( $request );
+    my $response = _ua->request( $request );
 
     $rc      = $response->code;
     $message = $response->message;
@@ -195,18 +217,6 @@ sub get_html {
 
 #----------------------------------------------------------------------------
 
-=head2 get_jar
-
-=over
-
-=item Required: E<36>url E<36>file
-
-=back
-
-Get's a jar file from C<url> and saves it in C<file>.
-
-=cut
-
 sub _check_md5sum {
   my ( $file, $md5sum ) = @_;
 
@@ -224,30 +234,57 @@ sub _check_md5sum {
 
     return 1;
   }
-} ## end sub _check_md5
+} ## end sub _check_md5sum
 
-sub get_jar {
+#----------------------------------------------------------------------------
+
+=head2 get_file
+
+=over
+
+=item Required: E<36>url E<36>file
+
+=back
+
+Get's a jar file from C<url> and saves it in C<file>.
+
+If an md5sum is passed as the third parameter, the file is checked against the md5sum.
+
+=cut
+
+sub get_file {
   my ( $url, $file, $md5sum ) = @_;
 
   return 1 if -f $file && _check_md5sum( $file, $md5sum );
   unlink $file if -f $file;
 
-  $log->info( 'downloading jarfile' );
+  $log->infof( 'downloading %s', $file );
 
-  require LWP::Simple;
-  LWP::Simple->import;
-  my $rc = getstore( $url, $file );
+  #    require LWP::UserAgent;
+  #
+  #    my $ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => 1 } );
+  #    $ua->agent( $ENV{MANAGE_MOD_AGENT} );
+
+  #  require LWP::Simple;
+  #  LWP::Simple->import;
+  #  my $rc = getstore( $url, $file );
+
+  my $request  = HTTP::Request->new( GET => $url );
+  my $response = _ua->request( $request, $file );
+  my $rc       = $response->code;
 
   if ( is_error( $rc ) ) {
     warn $log->fatalf( 'Got error %s when trying to download %s', $rc, $url );
     return 0;
   }
 
-  return 1 if -f $file && _check_md5( $file, $md5sum );
+  return 1 if -f $file && _check_md5sum( $file, $md5sum );
+
+  warn $log->fatalf( '%s did not pass md5sum (%s) check', $file, $md5sum );
   unlink $file if -f $file;
   return 0;
 
-} ## end sub get_jar
+} ## end sub get_file
 
 #----------------------------------------------------------------------------
 
@@ -266,14 +303,14 @@ Get's the final url from a redirected url.
 sub get_redirect {
   my ( $url ) = @_;
 
-  require LWP::UserAgent;
-
-  my $ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => 1 } );
-  $ua->agent( $ENV{MANAGE_MOD_AGENT} );
+  #  require LWP::UserAgent;
+  #
+  #  my $ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => 1 } );
+  #  $ua->agent( $ENV{MANAGE_MOD_AGENT} );
 
   my $header   = HTTP::Request->new( GET => $url );
   my $request  = HTTP::Request->new( 'GET', $url, $header );
-  my $response = $ua->request( $request );
+  my $response = _ua->request( $request );
 
   if ( $response->code != 200 ) {
     warn $log->fatalf( 'Non 200 response code from $url (%s: %s)', $response->code, $response->message );
