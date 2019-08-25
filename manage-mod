@@ -31,13 +31,8 @@ use YAML::Syck;
 #Log::Any::Adapter->set( 'File', "$HOME/.local/$ENV{BASENAME}" );
 Log::Any::Adapter->set( 'File', "$ENV{MANAGE_MOD_BASENAME}.log", log_level => 'debug' );
 
-my $local_file_cache = "$ENV{MANAGE_MOD_CACHE_DIR}/files";
-
-mkdir $local_file_cache
-  unless -d $local_file_cache;
-
 #-----------------------------------------------------------------------------
-sub get_mod {
+sub get_jar_file {
   my ( $mod, $version, $channels ) = @_;
 
   my $data = get_mod_info( $mod, $version, $channels );
@@ -52,16 +47,30 @@ sub get_mod {
   get_file( $download_url, $local_file, $md5sum )
     or croak "Couldn't get $data->{download}{filename}";
 
-  # XXX: Need to allow for separate channels for dependencies ...
   for my $depmod ( @{ $data->{dependencies} } ) {
-    get_mod( $depmod->{project}, $version, $channels );
+    get_mod( $depmod, $version, $channels );
   }
+
+  return $data;
 } ## end sub get_mod
 
 #-----------------------------------------------------------------------------
 
-my $mod      = 'dynamic-surroundings';
+#my $mod      = 'dynamic-surroundings';
+my $mod      = 'streams';
 my $ver      = '1.12.2';
 my $channels = 'release,beta';
 
-my $data = get_mod( $mod, $ver, $channels );
+#my $data = get_mod( $mod, $ver, $channels );
+my $data = get_mod_info( $mod, $version, $channels );
+
+  croak unless exists $data->{download};
+
+  my $download_url = $data->{download}{download_url};
+  my $md5sum       = $data->{download}{md5sum};
+
+  my $local_file = "$local_file_cache/$data->{download}{filename}";
+
+
+use YAML::Syck;
+DumpFile('./dump.yaml', $data);

@@ -260,15 +260,6 @@ sub get_file {
 
   $log->infof( 'downloading %s', $file );
 
-  #    require LWP::UserAgent;
-  #
-  #    my $ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => 1 } );
-  #    $ua->agent( $ENV{MANAGE_MOD_AGENT} );
-
-  #  require LWP::Simple;
-  #  LWP::Simple->import;
-  #  my $rc = getstore( $url, $file );
-
   my $request  = HTTP::Request->new( GET => $url );
   my $response = _ua->request( $request, $file );
   my $rc       = $response->code;
