@@ -8,20 +8,21 @@ use warnings;
 use parent 'Exporter::Tiny';
 
 ## no critic Modules::ProhibitAutomaticExportation
-our @EXPORT = qw(get_mod_info);
+our @EXPORT = qw(get_mod_data);
 
+use Carp;
 use Log::Any '$log';
 use Time::Piece;
-
 use Hash::Merge::Simple 'merge';
+
 use ManageMod::GetData;
 use ManageMod::Cache;
 use Scalar::Util 'looks_like_number';
 
 my $LOCAL_FILE_CACHE = "$ENV{MANAGE_MOD_CACHE_DIR}/files";
 
-mkdir $local_file_cache
-  unless -d $local_file_cache;
+mkdir $LOCAL_FILE_CACHE
+  unless -d $LOCAL_FILE_CACHE;
 
 my $API_BASE_URL = 'https://api.cfwidget.com';
 my $MAIN_CF_URL  = 'https://www.curseforge.com';
@@ -181,8 +182,8 @@ sub _base_info {
 
   # Fix the timestamps and add urls in files and versions.
   for my $f ( @{ $data->{files} } ) {
-    $f->{epoch}        = Time::Piece->strptime( delete $f->{uploaded_at}, '%Y-%m-%dT%H:%M:%SZ' )->[9];
-    $f->{files_url}    = "$MOD_BASE_URL/$modname/files/$f->{id}";
+    $f->{epoch}     = Time::Piece->strptime( delete $f->{uploaded_at}, '%Y-%m-%dT%H:%M:%SZ' )->[9];
+    $f->{files_url} = "$MOD_BASE_URL/$modname/files/$f->{id}";
 
     for my $v ( @{ $f->{versions} } ) {
       my $ver = $data->{versions}{$v} //= [];
@@ -283,7 +284,7 @@ sub _get_dependents {
 
 ##############################################################################
 
-sub get_mod_info {
+sub get_mod_data {
   my ( $modname, $mcversion, $channels ) = @_;
 
   die $log->fatalf( '%s expects a modname as the first parameter', ( caller( 0 ) )[3] )
@@ -297,7 +298,8 @@ sub get_mod_info {
 
   $channels = 'alpha|beta|release' if $channels =~ /any/i;
   $channels = lc $channels;
-  $channels =~ s/,/|/g;
+  #$channels =~ s/,/|/g;
+  $channels = join '|', sort split /[,|]/, $channels;
 
   my $cache_opts = {};
 
@@ -309,53 +311,58 @@ sub get_mod_info {
   my $cache = cache( $cache_opts );
   my $data  = $cache->get( $cache_key );
 
-  return $data if defined $data;
+  if ( !defined $data ) {
 
-  $log->debug( 'data cache expired or not there, freshening data' );
+    $log->debug( 'data cache expired or not there, freshening data' );
 
-  $data = {
-    'shortname' => $modname,
-    'mcversion' => $mcversion,
-    'channels'  => $channels,
-    'updated'   => time,
-  };
+    $data = {
+      'shortname' => $modname,
+      'mcversion' => $mcversion,
+      'channels'  => $channels,
+      'updated'   => time,
+    };
 
-  $data = merge $data, _base_info( $modname );
+    $data = merge $data, _base_info( $modname );
 
-  if ( !exists $data->{versions}{$mcversion} ) {
-    warn $log->fatalf( 'MC Version %s does not exist in data for %s', $mcversion, $modname );
-    return 0;
-  }
+    if ( !exists $data->{versions}{$mcversion} ) {
+      warn $log->fatalf( 'MC Version %s does not exist in data for %s', $mcversion, $modname );
+      return 0;
+    }
 
-  # Too many requests, will get blocked.
-  #$data = merge $data, _get_dependents( $modname );
+    # Too many requests, will get blocked.
+    #$data = merge $data, _get_dependents( $modname );
 
-  $data->{dependencies} = _get_dependencies( $modname );
+    $data->{dependencies} = _get_dependencies( $modname );
 
-  # Ignore channels (types) we aren't interested in, and sort the array so the
-  # latest mod is the first element.
+    # Ignore channels (types) we aren't interested in, and sort the array so the
+    # latest mod is the first element.
 
-  my @v = sort { $b->{epoch} <=> $a->{epoch} }
-    grep { $_->{type} =~ /^($channels)$/ } @{ $data->{versions}{$mcversion} };
+    my @v = sort { $b->{epoch} <=> $a->{epoch} }
+      grep { $_->{type} =~ /^($channels)$/ } @{ $data->{versions}{$mcversion} };
 
-  $data->{download} = $v[0];
+    $data->{download} = $v[0];
 
-  my $meta = _file_info( $modname, $v[0]->{files_url} );
-  $v[0]->{md5sum}   = $meta->{md5sum};
-  $v[0]->{filename} = $meta->{filename};
+    my $meta = _file_info( $modname, $v[0]->{files_url} );
+    $v[0]->{md5sum}   = $meta->{md5sum};
+    $v[0]->{filename} = $meta->{filename};
 
-  $v[0]->{id} =~ /(\d{4})(\d+)/;
-  my ( $p1, $p2 ) = ( $1, $2 );
-  $p2 =~ s/^0+//;
-  $v[0]->{download_url} = "$DL_BASE_URL/$p1/$p2/$v[0]->{filename}";
-  $v[0]->{local_url} = "$LOCAL_FILE_CACHE/$data->{download}{filename}";
+    $v[0]->{id} =~ /(\d{4})(\d+)/;
+    my ( $p1, $p2 ) = ( $1, $2 );
+    $p2 =~ s/^0+//;
+    $v[0]->{download_url} = "$DL_BASE_URL/$p1/$p2/$v[0]->{filename}";
+    $v[0]->{local_url}    = "$LOCAL_FILE_CACHE/$data->{download}{filename}";
 
-  $cache->set( $cache_key, $data );
+    $cache->set( $cache_key, $data );
+  } ## end if ( !defined $data )
 
-  get_file( $v[0]->{download_url}, $v[0]->{local_file}, $md5sum )
+  my $download_url = $data->{download}{download_url};
+  my $local_url = $data->{download}{local_url};
+  my $md5sum = $data->{download}{md5sum};
+
+  get_file( $download_url, $local_url, $md5sum )
     or croak "Couldn't get $data->{download}{filename}";
 
   return $data;
-} ## end sub get_mod_info
+} ## end sub get_mod_data
 
 1;

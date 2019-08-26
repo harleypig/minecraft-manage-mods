@@ -21,56 +21,34 @@ BEGIN {
 
 use lib "$RealBin/lib";
 
-use Carp;
 use Log::Any::Adapter;
-use ManageMod::CurseForge::GetModInfo;
-use ManageMod::GetData;
-use YAML::Syck;
+use ManageMod::CurseForge;
 
 #-----------------------------------------------------------------------------
 #Log::Any::Adapter->set( 'File', "$HOME/.local/$ENV{BASENAME}" );
 Log::Any::Adapter->set( 'File', "$ENV{MANAGE_MOD_BASENAME}.log", log_level => 'debug' );
 
 #-----------------------------------------------------------------------------
-sub get_jar_file {
-  my ( $mod, $version, $channels ) = @_;
-
-  my $data = get_mod_info( $mod, $version, $channels );
-
-  croak unless exists $data->{download};
-
-  my $download_url = $data->{download}{download_url};
-  my $md5sum       = $data->{download}{md5sum};
-
-  my $local_file = "$local_file_cache/$data->{download}{filename}";
-
-  get_file( $download_url, $local_file, $md5sum )
-    or croak "Couldn't get $data->{download}{filename}";
-
-  for my $depmod ( @{ $data->{dependencies} } ) {
-    get_mod( $depmod, $version, $channels );
-  }
-
-  return $data;
-} ## end sub get_mod
-
-#-----------------------------------------------------------------------------
-
-#my $mod      = 'dynamic-surroundings';
 my $mod      = 'streams';
-my $ver      = '1.12.2';
+my $version  = '1.12.2';
 my $channels = 'release,beta';
 
-#my $data = get_mod( $mod, $ver, $channels );
-my $data = get_mod_info( $mod, $version, $channels );
+my $data = get_mod_data( $mod, $version, $channels );
 
-  croak unless exists $data->{download};
+# Need to loop through dependencies.
+# for my $depmod ( @{ $data->{dependencies} } ) {
+#   get_mod( $depmod, $version, $channels );
+# }
 
-  my $download_url = $data->{download}{download_url};
-  my $md5sum       = $data->{download}{md5sum};
+my @main = qw(
+  categories dependencies description donate game id last_fetch license links
+  shortname title type updated url
+);
 
-  my $local_file = "$local_file_cache/$data->{download}{filename}";
+my $newdata = {};
 
+$newdata->{$_} = $data->{$_} for @main;
+$newdata->{"$version - $data->{channels}"} = $data->{download};
 
 use YAML::Syck;
-DumpFile('./dump.yaml', $data);
+DumpFile( './dump.yaml', $newdata );
