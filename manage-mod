@@ -5,6 +5,7 @@
 use strict;
 use warnings;
 
+# XXX: create main ManageMod module and do most of the setup there.
 # XXX: Move config to ManageMod::Config
 
 BEGIN {
@@ -35,8 +36,52 @@ my $LogFile = "$ENV{MANAGE_MOD_CACHE_DIR}/$ENV{MANAGE_MOD_BASENAME}.log";
 Log::Any::Adapter->set( 'File', "$LogFile", log_level => 'debug' );
 
 #-----------------------------------------------------------------------------
+my $config;
+
+#-----------------------------------------------------------------------------
+# Get jarfile and link it.
+
+my @wanted = qw( filename filesize md5sum );
+
+sub link_jar {
+  my ( $mod ) = @_;
+
+  my $data = get_mod_data( $mod, $config->{mc_version}, $config->{channels} );
+  $config->{mods}{$mod}{$_} = $data->{download}{$_} for @wanted;
+
+  my $target = "$config->{directory}/$config->{mods}{$mod}{filename}";
+  my $source = $data->{download}{local_url};
+
+  if ( -e $target ) {
+    if ( -l $target ) {
+      my $resolved = readlink $target;
+
+      croak $log->fatalf( '%s is a symlink, but does not point to our cached file' )
+        unless $source eq $resolved;
+
+      unlink $target;
+
+      croak $log->fatalf( 'could not create symbolic link for %s', $mod )
+        unless symlink $source, $target;
+
+    } else {
+      croak $log->fatalf( '%s exists and is not a symlinked file', $mod );
+
+    }
+  } else {
+    croak $log->fatalf( 'could not create symbolic link for %s', $mod )
+      unless symlink $source, $target;
+  }
+
+  if ( @{ $data->{dependencies} } ) {
+    my $d = $config->{mods}{$mod}{dependencies} = $data->{dependencies};
+    link_jar( $_ ) for @$d;
+  }
+} ## end sub link_jar
+
+#-----------------------------------------------------------------------------
 my $config_file = './mods.cfg';
-my $config      = LoadFile( './mods.cfg' );
+$config = LoadFile( './mods.cfg' );
 
 my @expected_config = qw( mc_version channels directory mods );
 
@@ -56,14 +101,7 @@ croak $log->fatalf( 'directory %s does not exist or is not accessible', $config-
 croak $log->fatalf( 'mods entry must be a hashref' )
   unless ref $config->{mods} eq 'HASH';
 
-$DB::single++;
-
-my @wanted = qw( filename filesize md5sum );
-
-for my $mod ( keys %{$config->{mods}} ) {
-  my $data = get_mod_data( $mod, $config->{mc_version}, $config->{channels} );
-
-  $config->{mods}{$mod}{$_} = $data->{download}{$_} for @wanted;
-}
+#-----------------------------------------------------------------------------
+link_jar( $_ ) for keys %{ $config->{mods} };
 
 DumpFile( $config_file, $config );
