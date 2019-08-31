@@ -24,7 +24,6 @@ BEGIN {
 
 use lib "$RealBin/lib";
 
-use Carp;
 use Log::Any::Adapter;
 use ManageMod::CurseForge;
 use YAML::Syck;
@@ -56,20 +55,20 @@ sub link_jar {
     if ( -l $target ) {
       my $resolved = readlink $target;
 
-      croak $log->fatalf( '%s is a symlink, but does not point to our cached file' )
+      die $log->fatalf( '%s is a symlink, but does not point to our cached file' )
         unless $source eq $resolved;
 
       unlink $target;
 
-      croak $log->fatalf( 'could not create symbolic link for %s', $mod )
+      die $log->fatalf( 'could not create symbolic link for %s', $mod )
         unless symlink $source, $target;
 
     } else {
-      croak $log->fatalf( '%s exists and is not a symlinked file', $mod );
+      die $log->fatalf( '%s exists and is not a symlinked file', $mod );
 
     }
   } else {
-    croak $log->fatalf( 'could not create symbolic link for %s', $mod )
+    die $log->fatalf( 'could not create symbolic link for %s', $mod )
       unless symlink $source, $target;
   }
 
@@ -92,13 +91,13 @@ for my $c ( @expected_config ) {
     unless exists $config->{$c};
 }
 
-croak $log->fatalf( 'no %s found in %s', do { join ', ', @missing }, $config_file )
+die $log->fatalf( 'no %s found in %s', do { join ', ', @missing }, $config_file )
   if @missing;
 
-croak $log->fatalf( 'directory %s does not exist or is not accessible', $config->{directory} )
+die $log->fatalf( 'directory %s does not exist or is not accessible', $config->{directory} )
   unless -r $config->{directory};
 
-croak $log->fatalf( 'mods entry must be a hashref' )
+die $log->fatalf( 'mods entry must be a hashref' )
   unless ref $config->{mods} eq 'HASH';
 
 #-----------------------------------------------------------------------------

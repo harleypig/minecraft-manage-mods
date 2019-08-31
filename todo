@@ -1,0 +1,21 @@
+customization:
+  base url: https://www.curseforge.com/minecraft/customization
+  eval:
+    eight-stairs
+    more-logical-craft
+    wool-into-string
+    quark-information
+    craftingplus
+    better-recipes
+
+addons:
+  base url: https://www.curseforge.com/minecraft/mc-addons
+  eval:
+    minecraft-font
+
+texture-packs:
+  base url: https://www.curseforge.com/minecraft/texture-packs
+  eval:
+    d-creatorcraft
+
+resource-packs:

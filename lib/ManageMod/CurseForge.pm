@@ -10,7 +10,6 @@ use parent 'Exporter::Tiny';
 ## no critic Modules::ProhibitAutomaticExportation
 our @EXPORT = qw(get_mod_data);
 
-use Carp;
 use Log::Any '$log';
 use Time::Piece;
 use Hash::Merge::Simple 'merge';
@@ -36,7 +35,7 @@ my $SCRAPE_URL = "$MAIN_CF_URL/minecraft";
 my $MOD_BASE_URL = "$SCRAPE_URL/mc-mods";
 
 my $IN_QUEUE_SLEEP    = 30;
-my $IN_QUEUE_ATTEMPTS = 3;
+my $IN_QUEUE_ATTEMPTS = 5;
 my $RELATIONS_SLEEP   = 10;
 
 ##############################################################################
@@ -52,33 +51,33 @@ sub _array_check {
 
   if ( @$arr > 1 ) {
     warn $log->infof( 'Unexpected %s count in base page, assuming first entry', $check );
-    return 0;
+    return undef;
   }
 
   if ( @$arr < 1 ) {
     warn $log->infof( 'No %s found, did they change things?', $check );
-    return 0;
+    return undef;
   }
 
   return 1;
 } ## end sub _array_check
 
-# Try MOD_API1_URL, then MOD_API2_URL, then try to find and scrape the project page.
-# Ultimately, we want to normalize the basic information from this sub.
-#
-# XXX: use api2 ...
-
 #-----------------------------------------------------------------------------
 sub _get_api {
-  my ( $url ) = @_;
+  my ( $mod ) = @_;
 
+  my $api1_fail = 0;
+  my $found     = 0;
+  my $url       = "$MOD_API1_URL/$mod";
   my $data;
-  my $found = 0;
 
   for my $attempt ( 1 .. $IN_QUEUE_ATTEMPTS ) {
     $log->debug( "Attempt #$attempt ..." );
 
     $data = get_json( $url );
+
+    return undef unless defined $data;
+
     $log->debug( $data );
 
     if ( exists $data->{error} ) {
@@ -88,20 +87,29 @@ sub _get_api {
         next;
 
       } elsif ( $data->{error} =~ /not_found|invalid_path/ ) {
-        warn $log->infof( '%s: %s', $data->{title}, $data->{message} );
-        last;
+        if ( !$api1_fail ) {
+          $url = "$MOD_API2_URL/$mod";
+          $api1_fail++;
+          warn $log->infof( 'Trying %s', $url );
+          sleep $IN_QUEUE_SLEEP;
+          next;
+        } else {
+          warn $log->infof( '%s: %s', $data->{title}, $data->{message} );
+          warn $log->infof( 'No results for %s found via api', $mod );
+          last;
+        }
 
       } else {
         warn $log->fatal( 'Unknown error, see log for details.' );
         last;
       }
-    }
+    } ## end if ( exists $data->{error...})
 
     $found++;
     last;
   } ## end for my $attempt ( 1 .. ...)
 
-  return $found ? $data : 0;
+  return $found ? $data : undef;
 } ## end sub _get_api
 
 #-----------------------------------------------------------------------------
@@ -115,7 +123,7 @@ sub _get_html {
 
   if ( $rc != 200 ) {
     $log->fatalf( 'Status code was not 200: %s %s', $rc, $message );
-    return 0;
+    return undef;
   }
 
   my $data = { game => 'minecraft' };
@@ -160,15 +168,15 @@ sub _get_html {
 sub _base_info {
   my ( $modname ) = @_;
 
-  # Try MOD_API1_URL first.
-  my $json = _get_api( "$MOD_API1_URL/$modname" )
-    or return 0;
+  my $json = _get_api( $modname );
+  my $html = _get_html( $modname );
 
-  # Get missing data.
-  my $missing = _get_html( $modname )
-    or return 0;
+  return undef
+    unless defined $json
+    or defined $html;
 
-  my $data = merge $json, $missing;
+  my $data = merge $json, $html
+    if defined $json;
 
   my @cleanup = qw(
     created_at
@@ -204,7 +212,7 @@ sub _file_info {
 
   if ( $rc != 200 ) {
     $log->fatalf( 'Status code was not 200: %s %s', $rc, $message );
-    return 0;
+    return undef;
   }
 
   my $data  = {};
@@ -238,7 +246,7 @@ sub _get_relations {
 
   if ( @$pagelinks > 0 ) {
     warn $log->warn( "Haven't written code to handle multiple pages yet" );
-    return 0;
+    return undef;
   }
 
   my @relations = ();
@@ -298,6 +306,7 @@ sub get_mod_data {
 
   $channels = 'alpha|beta|release' if $channels =~ /any/i;
   $channels = lc $channels;
+
   #$channels =~ s/,/|/g;
   $channels = join '|', sort split /[,|]/, $channels;
 
@@ -322,11 +331,18 @@ sub get_mod_data {
       'updated'   => time,
     };
 
-    $data = merge $data, _base_info( $modname );
+    my $base_info = _base_info( $modname );
+
+    if ( undefined $base_info ) {
+      warn $log->fatalf('Unable to find any information about %s', $modname);
+      return undef;
+    }
+
+    $data = merge $data, $base_info;
 
     if ( !exists $data->{versions}{$mcversion} ) {
       warn $log->fatalf( 'MC Version %s does not exist in data for %s', $mcversion, $modname );
-      return 0;
+      return undef;
     }
 
     # Too many requests, will get blocked.
@@ -356,11 +372,11 @@ sub get_mod_data {
   } ## end if ( !defined $data )
 
   my $download_url = $data->{download}{download_url};
-  my $local_url = $data->{download}{local_url};
-  my $md5sum = $data->{download}{md5sum};
+  my $local_url    = $data->{download}{local_url};
+  my $md5sum       = $data->{download}{md5sum};
 
   get_file( $download_url, $local_url, $md5sum )
-    or croak "Couldn't get $data->{download}{filename}";
+    or die "Couldn't get $data->{download}{filename}";
 
   return $data;
 } ## end sub get_mod_data

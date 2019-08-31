@@ -229,7 +229,7 @@ sub _check_md5sum {
 
     if ( $digest ne $md5sum ) {
       warn $log->fatalf( 'md5sum for %s does not match expected md5sum', $file );
-      return 0;
+      return undef;
     }
 
     return 1;
@@ -266,14 +266,14 @@ sub get_file {
 
   if ( is_error( $rc ) ) {
     warn $log->fatalf( 'Got error %s when trying to download %s', $rc, $url );
-    return 0;
+    return undef;
   }
 
   return 1 if -f $file && _check_md5sum( $file, $md5sum );
 
   warn $log->fatalf( '%s did not pass md5sum (%s) check', $file, $md5sum );
   unlink $file if -f $file;
-  return 0;
+  return undef;
 
 } ## end sub get_file
 
@@ -305,7 +305,7 @@ sub get_redirect {
 
   if ( $response->code != 200 ) {
     warn $log->fatalf( 'Non 200 response code from $url (%s: %s)', $response->code, $response->message );
-    return 0;
+    return undef;
   }
 
   return $response->request->uri;
