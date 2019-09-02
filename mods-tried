@@ -1,0 +1,28 @@
+pre-generate world?
+can use settings to flattten bedrock? or need use betterbedrockgen?
+
+Will use:
+
+see minecolonies.cfg
+
+Won't use:
+
+  advanced-finders:
+  large-ore-deposits:
+  forgeendertech:
+    - has too many dependencies
+
+shaders:
+  Sildurs?
+  https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/1291396-1-7-10-1-14-4-sildurs-shaders-pc-mac-intel
+
+  Chocapic13s?
+  https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/1293898-1-14-chocapic13s-shaders
+  
+modpacks to examine:
+  life-in-the-village
+  minecolonies-testpack
+  minecolonies-getting-started
+  realistic-colonies
+  colonial-age
+  minimalist-minecolonies
