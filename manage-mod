@@ -79,8 +79,9 @@ sub link_jar {
 } ## end sub link_jar
 
 #-----------------------------------------------------------------------------
-my $config_file = './mods.cfg';
-$config = LoadFile( './mods.cfg' );
+#my $config_file = './mods.cfg';
+my $config_file = './test-single-mods.cfg';
+$config = LoadFile( $config_file );
 
 my @expected_config = qw( mc_version channels directory mods );
 
