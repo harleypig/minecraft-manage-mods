@@ -184,26 +184,23 @@ sub _base_info {
     if defined $html;
 
   # Fix the timestamps and add urls in files and versions.
-  for my $f ( @{ $data->{files} } ) {
-    $f->{epoch} = Time::Piece->strptime( delete $f->{uploaded_at}, '%Y-%m-%dT%H:%M:%SZ' )->[9];
 
-    # Sometimes the versions hash won't be duplicated in the the files hash,
-    # so we have to do it there too.
-
-    for my $version ( keys %{ $data->{versions} } ) {
-      for my $f1 ( @{ $data->{versions}{$version} } ) {
-        $f1->{epoch} = Time::Piece->strptime( delete $f1->{uploaded_at}, '%Y-%m-%dT%H:%M:%SZ' )->[9]
-          if exists $f1->{uploaded_at};
-      }
+  for my $version ( keys %{ $data->{versions} } ) {
+    for my $f ( @{ $data->{versions}{$version} } ) {
+      $f->{epoch}     = Time::Piece->strptime( delete $f->{uploaded_at}, '%Y-%m-%dT%H:%M:%SZ' )->[9];
+      $f->{files_url} = "$MOD_BASE_URL/$modname/files/$f->{id}";
     }
+  }
 
+  for my $f ( @{ $data->{files} } ) {
+    $f->{epoch}     = Time::Piece->strptime( delete $f->{uploaded_at}, '%Y-%m-%dT%H:%M:%SZ' )->[9];
     $f->{files_url} = "$MOD_BASE_URL/$modname/files/$f->{id}";
 
     for my $v ( @{ $f->{versions} } ) {
       my $ver = $data->{versions}{$v} //= [];
       push @$ver, $f;
     }
-  } ## end for my $f ( @{ $data->{...}})
+  }
 
   return $data;
 } ## end sub _base_info
