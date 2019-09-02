@@ -2,8 +2,7 @@
 
 ## no critic
 
-use strict;
-use warnings;
+use strictures 2;
 
 # XXX: create main ManageMod module and do most of the setup there.
 # XXX: Move config to ManageMod::Config
