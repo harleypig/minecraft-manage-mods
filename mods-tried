@@ -1,6 +1,11 @@
 pre-generate world?
 can use settings to flattten bedrock? or need use betterbedrockgen?
 
+need to write utility for (evaluate also):
+!http://chocolateminecraft.com/betterpvp.html
+!http://chocolateminecraft.com/worldmap.html
+!http://optifine.net/downloads
+
 Will use:
 
 see minecolonies.cfg
@@ -11,6 +16,7 @@ Won't use:
   large-ore-deposits:
   forgeendertech:
     - has too many dependencies
+    - write option to manually specify dependencies?
 
 shaders:
   Sildurs?
@@ -18,7 +24,7 @@ shaders:
 
   Chocapic13s?
   https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/1293898-1-14-chocapic13s-shaders
-  
+
 modpacks to examine:
   life-in-the-village
   minecolonies-testpack

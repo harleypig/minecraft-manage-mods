@@ -1,0 +1,201 @@
+#############################################################################
+# From Amidst
+#
+# Does /locate work?
+
+Seed: -5802435115809586519
+
+Locations approximate:
+
+Colony Town Hall: 7200,?,150
+
+Spawn: -240,?,68
+
+Stronghold:
+1472,?,-1808
+7728,?,-1088
+
+Village:
+6948,?,276
+6804,?,-252
+6516,?,-172
+
+Witch's Hut:
+6728,?,360
+
+Igloo:
+9432,?,120
+
+##############################################################################
+## Prep: Before creating world.
+
+Decide on mods to use, learn them. Setup configuration, create modpack.
+
+Use amidst and creative mods to find good seed/place to start colony.
+Preferably plains, wide open, relatively flat.
+
+Build ultimate list of blocks and counts for blocks needed.
+
+Plan layout of site.
+
+##############################################################################
+## Prep: After creating world.
+
+Explore and collect blocks, especially uncommon and rare blocks.
+
+Use mods not related to minecolonies mod.
+
+???
+
+##############################################################################
+
+See https://www.youtube.com/watch?v=Y5mb2Zcw6mc for ideas on how to plan out
+the colony.
+
+##############################################################################
+Thoughts
+
+o Prefill builders huts with most common items. Means need to calculate item
+amounts for all levels of all buildings. Also, will have to go on increasingly
+lengthy adventures to get the more exotic stuff, including the nether.
+
+o Create template for buildings/groupings (see below) and place them with
+builder. Will need to manually layout immediate area around town hall so first
+builder hut can be placed correctly. Need to plan Group 1 template
+accordingly.
+
+o Since I want a flat(ish) plain, and I want to be able to see past the walls,
+maybe I should raise the ground level to the height of the walls ...
+
+o Schematics for builder so does the boring work of preparation?
+
+o Limited to 50 citizens (configurable); barracks provides 16 total at max,
+leaving 34 citizens to fill 6 huts (remaining 4 in town hall?). Build
+6 citizen huts immediately and make last two guards.
+
+o Because barbarians/pirates will spawn after 4 citizens, build guard towers
+before building last two citizen huts.
+
+o Build all buildings right away, and level them all up each time the
+builder's get leveled. Or, perhaps, level builders as much as possible first
+... then build remaining buildings.
+
+o Each group should have a guard tower and a deliveryman hut.
+
+##############################################################################
+# Grouping
+
+Town Hall in center of colony. Of course.
+
+Level up citizen huts first then other huts as seems appropriate.
+  Except for initially, build citizens huts last the first time.
+
+Each level provides 6 new citizens:
+
+Level 1:
+  2 Builder
+  1 Cook
+  1 Guard Tower
+  1 Lumberjack
+  1 Miner
+
+Level 2:
+  2 DeliveryMan
+  1 Fisherman
+  1 Guard Tower
+  1 Sawmill
+  1 StoneMason
+
+Level 3:
+  1 DeliveryMan
+  1 Guard Tower
+  1 Blacksmith
+  1 Crusher
+  1 Smeltery
+  1 Stone Smeltery
+
+Level 4:
+  1 DeliveryMan
+  2 Guard Tower
+  1 Composter
+  1 Cowboy
+  1 Farm
+
+Level 5:
+  1 DeliveryMan
+  1 Guard Tower
+  1 Bakery
+  1 Chicken Herder
+  1 Sheperd
+  1 Swine Herder
+
+Before Level 2, build Warehouse
+
+Somewhere in here need to build Barracks, Archery, Combat and Library.
+
+------------------------------------------------------------------------------
+
+Group 1 One side of Town Hall
+  Citizen Hut
+  Bakery (Level 5)
+  Builder (Level 1)
+  DeliveryMan (Level 2)
+  Guard Tower (Level 1)
+  Restaurant (Level 1)
+
+  Notes:
+    need to use placeholder in group template so
+    existing Builder hut isn't destroyed
+
+Group 2 Opposite side of Town Hall from Group 1
+  Citizen Hut
+  Builder (Level 1)
+  DeliveryMan (Level 2)
+  Guard Tower (Level 2)
+  Sawmill (Level 2)
+  Stonemason (Level 2)
+
+Group 3
+  Citizen Hut
+  Blacksmith (Level 3)
+  Crusher (Level 3)
+  DeliveryMan (Level 3)
+  Guard Tower (Level 3)
+  Home for Freestanding Hut
+
+Group 4
+  Citizen Hut
+  Guard Tower (Level 4)
+  DeliveryMan (Level 4)
+  Composter (Level 4)
+  Cowboy (Level 4)
+  Farm (Level 4)
+
+Group 5
+  Citizen Hut
+  Guard Tower (Level 4)
+  DeliveryMan (Level 5)
+  Smeltery (Level 3)
+  Stone Smeltery (Level 3)
+  Home for Freestanding Hut
+
+Group 6
+  Citizen Hut
+  Guard Tower (Level 5)
+  Chicken Herder (Level 5)
+  Sheperd (Level 5)
+  Swine Herder (Level 5)
+  Home for Freestanding Hut
+
+Group Misc
+  Archery
+  Barracks
+  Combat
+  Library
+  Warehouse
+
+Freestanding, placed as needed
+  Miner (Level 1)
+  Lumberjack (Level 1)
+  Fisherman (Level 2)
+
