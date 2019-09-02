@@ -29,7 +29,7 @@ with the following options:
 
   { depth      => 2,
     driver     => 'File',
-    expires_in => '24 hours',
+    expires_in => '1 week',
     label      => 'manage-mods',
     namespace  => 'manage-mods',
     root_dir   => '~/.cache/manage-mods',
@@ -57,7 +57,7 @@ our $DEFAULT_CACHE_DIR = "$ENV{MANAGE_MOD_CACHE_DIR}" // "$ENV{HOME}/.cache/$DEF
 our $DEFAULT_CACHE_OPTS = {
   depth      => 2,
   driver     => 'File',
-  expires_in => '24 hours',
+  expires_in => '1 week',
 };
 
 sub cache {

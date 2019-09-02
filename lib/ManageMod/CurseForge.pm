@@ -175,29 +175,35 @@ sub _base_info {
     unless defined $json
     or defined $html;
 
-  my $data = merge $json, $html
+  my $data = {};
+
+  $data = merge( $data, $json )
     if defined $json;
 
-  my @cleanup = qw(
-    created_at
-    download
-    thumbnail
-    urls
-    versions
-  );
-
-  delete $data->{$_} for @cleanup;
+  $data = merge( $data, $html )
+    if defined $html;
 
   # Fix the timestamps and add urls in files and versions.
   for my $f ( @{ $data->{files} } ) {
-    $f->{epoch}     = Time::Piece->strptime( delete $f->{uploaded_at}, '%Y-%m-%dT%H:%M:%SZ' )->[9];
+    $f->{epoch} = Time::Piece->strptime( delete $f->{uploaded_at}, '%Y-%m-%dT%H:%M:%SZ' )->[9];
+
+    # Sometimes the versions hash won't be duplicated in the the files hash,
+    # so we have to do it there too.
+
+    for my $version ( keys %{ $data->{versions} } ) {
+      for my $f1 ( @{ $data->{versions}{$version} } ) {
+        $f1->{epoch} = Time::Piece->strptime( delete $f1->{uploaded_at}, '%Y-%m-%dT%H:%M:%SZ' )->[9]
+          if exists $f1->{uploaded_at};
+      }
+    }
+
     $f->{files_url} = "$MOD_BASE_URL/$modname/files/$f->{id}";
 
     for my $v ( @{ $f->{versions} } ) {
       my $ver = $data->{versions}{$v} //= [];
       push @$ver, $f;
     }
-  }
+  } ## end for my $f ( @{ $data->{...}})
 
   return $data;
 } ## end sub _base_info
@@ -333,8 +339,8 @@ sub get_mod_data {
 
     my $base_info = _base_info( $modname );
 
-    if ( undefined $base_info ) {
-      warn $log->fatalf('Unable to find any information about %s', $modname);
+    if ( !length $base_info ) {
+      warn $log->fatalf( 'Unable to find any information about %s', $modname );
       return undef;
     }
 
