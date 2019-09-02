@@ -1,0 +1,17 @@
+--- 
+commands: 
+  add: add mod
+  remove: remove mod
+function: 
+  - remove mods not in config file (with option to ignore mods like optifine)
+support: 
+  addons: 
+    base url: https://www.curseforge.com/minecraft/mc-addons
+    eval: minecraft-font
+  customization: 
+    base url: https://www.curseforge.com/minecraft/customization
+    eval: eight-stairs more-logical-craft wool-into-string quark-information craftingplus better-recipes
+  resource-packs: ~
+  texture-packs: 
+    base url: https://www.curseforge.com/minecraft/texture-packs
+    eval: d-creatorcraft
