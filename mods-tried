@@ -1,4 +1,6 @@
 pre-generate world?
+  chunkpregenerator
+
 can use settings to flattten bedrock? or need use betterbedrockgen?
 
 need to write utility for (evaluate also):
@@ -18,12 +20,17 @@ Won't use:
     - has too many dependencies
     - write option to manually specify dependencies?
 
-shaders:
-  Sildurs?
-  https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/1291396-1-7-10-1-14-4-sildurs-shaders-pc-mac-intel
+  mo-creatures:
+    - requires custom-mob-spawner, which isn't updated on forge
+    - another one to write custom code for?
 
-  Chocapic13s?
-  https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/1293898-1-14-chocapic13s-shaders
+  betterportals:
+    - another one that has dependents mixed up with dependencies
+    - not mixed up, optional also includes supported mods
+
+shader:
+  Sildurs
+  https://sildurs-shaders.github.io
 
 modpacks to examine:
   life-in-the-village

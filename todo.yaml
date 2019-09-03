@@ -3,9 +3,8 @@ commands:
   add: add mod
   remove: remove mod
 function: 
+  - need to parse file page
   - remove mods not in config file (with option to ignore mods like optifine)
-  - files information appears to be out of date for some mods via the cfwidget api, need to add a routine to scrape the files page
-  - "consider: do we need to just not use the cfwidget api?"
   - add verbose option and better informational messages
 support: 
   addons: 
