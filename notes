@@ -2,7 +2,44 @@ pre-generate world?
   chunkpregenerator
 
 can use settings to flattten bedrock? or need use betterbedrockgen?
+  use cofh world to flatten bedrock see config/cofh/world/config.cfg
 
+==============================================================================
+Create web page (mc.harleypig.com), server (mc.harleypig.com)
+
+web page links to reviews of modules (static html?), current configuration, etc.
+
+==============================================================================
+Series:
+  Standalone Mods
+  Pam's HarvestCraft
+  Better With Mods
+  Minecolonies
+  Standalone Mods that are very detailed (like millenaire)
+
+==============================================================================
+Create my own categories on top of curseforge:
+
+pregame: Mods like better-title-screen
+
+utility: Mods like openeye or loading-profiler
+
+worldgen-invisible: mods that don't require the user to learn new stuff, or
+give the player new capabilities, like streams or betterbedrockgen
+
+worldgen-just-is: mods that give the player new capabilities but no new
+objects
+
+server-side only
+client-side only
+only good for multiplayer
+only good for single player
+craftingtable, crafting
+bed, sleeping
+village, npcs
+hud, informational
+
+???
 
 ==============================================================================
 
@@ -12,14 +49,6 @@ shader:
 
 resourcepack:
   atlas.graphics - Pulchra
-
-modpacks to examine:
-  life-in-the-village
-  minecolonies-testpack
-  minecolonies-getting-started
-  realistic-colonies
-  colonial-age
-  minimalist-minecolonies
 
 ==============================================================================
 
@@ -53,71 +82,169 @@ Streams:
 actually-additions
 additional-structures
 advanced-chimneys
+ai-improvements
 akashic-tome
+aquaculture
+armorplus
+atlcraft-candles-mod
+atop
 backpacks
 baubles
+bed-bugs
+bed-patch
+better-advancements
 better-builders-wands
 better-title-screen
 better-with-addons
 bibliocraft
 bibliocraft-bibliowoods-biomes-oplenty-edition
+bigger-packets-please
+biome-bundle
 blockdispenser
+block-drops-jei-addon
+blocksniffer
+bountiful
 buildcraft
 bwm-suite
+ceramics
+charm
+chest-transporter
 chisel
 chisels-bits
 climate-control-geographicraft
+clipboard
 clumps
+colorutility
+comforts
+compressed-items
+controlling
 convenient-additions
+cooking-for-blockheads
+cplpibalds-tweaks
 craftingcraft
 craftingtable-iv
 crafting-tweaks
+crafttweaker
+ctm
+custom-backgrounds
+custom-main-menu
+custom-npcs
 death-compass
+deathquotes-death-quotes
 decocraft2
+default-options
 dense-ores
+desirepaths
+diamond-glass
 diamond-lucky-block
+ding
+dirt-deco
+doggy-talents
+durability-show
 dynamic-surroundings
 dynamic-surroundings-huds
+earthworks
 ender-lucky-block-armory-update
 endertanks
 enhanced-mob-spawners
 exotic-birds
+expandedbonemeal
 external-tweaker
+extra-alchemy
 extra-utilities
+ezstorage-2
+familiar-fauna
+farming-for-blockheads
+faster-ladder-climbing
+fastfurnace
 fast-leaf-decay
+fastworkbench
+featured-servers
 ferdinands-flowers
 finder-compass
 find-your-way
+foamfix-for-minecraft
+giselbaers-durability-viewer
 guidebook
 helpfixer
 holoinventory
 hopper-ducts
+hwyla
+improved-hoes
 infinitefluids
 infinitely-spreading-water
+ingameconfigmanager
 ingame-info-xml
+inspirations
 inventory-tweaks
 iron-chests
+item-filters
+its-the-little-things
 ivtoolkit
+jei
+just-a-few-fish
+just-a-raft-mod
 just-enough-calculation
 just-enough-dimensions
+just-enough-harvestcraft
 just-enough-items-jei
+just-enough-resources-jer
+just-sleep
 kleeslabs
+laggoggles
+landlust-furniture
+lapis-stays-in-the-enchanting-table
 large-veins
 lepton
+lever-button-lights
+light-level-overlay-reloaded
+loading-profiler
 lootbags
 lots-of-things
 lucky-block-pink
+main-menu-scale
+millenaire
 minecolonies
+minefactory-reloaded
 minetweaker3
+minetweaker-recipemaker
+missing-pieces
+mmd-orespawn
 mo-bends
+modtweaker
+more-beautiful-buttons
+more-beautiful-plates
 more-fuels-mod
+more-furnaces
 mo-villages
 multistorage
 natures-compass
+neat
+netherex
+netherportalfix
+no-night-vision-flashing
+no-poles
+no-recipe-book
+notenoughscaffold
+notes
 omlib
+onlinepictureframe
+open-terrain-generator
+ore-excavation
+paintings
+pams-get-all-the-seeds
+pams-harvestcraft
+pickle-tweaks
 pillar
+ping
+plants
 platforms
+pong
+potion-core
+project-vibrant-journeys
 pyramid-plunder
+quality-tools
+quantumstorage
 quick-leaf-decay
 randomconfigs
 randompatches
@@ -127,17 +254,30 @@ realistic-item-drops
 recubed
 recurrent-complex
 refined-relocation-2
+repurpose
+resource-loader
+roguelike-dungeons
 sbm-wooden-buckets
 sbm-wooden-shears
 scenter-mod
 serene-seasons
 shadowfacts-forgelin
 shoulder-surfing-reloaded
+signpost
 simple-achievements
 simpleharvest
+simple-storage-network
 smarthoppers-mod
+snad
+sophisticated-wolves
 sound-filters
+spartan-shields
+splashanimation
 startinginventory
+stepup
+stimmedcow-nomorerecipeconflict
+storage-drawers
+storage-drawers-extras
 super-crafting-frame
 techno-lucky-block
 terraqueous
@@ -149,14 +289,29 @@ thermal-foundation
 tidychunk
 time-speed-mod
 tiny-progressions
+toast-control
+torch-optimizer
 trashslot
 treasure2
 utility-worlds
+vanilla-builders-extension
+vanillafoodpantry-mod
+vanilla-tools
+vanillatweaks
+vaultopic-early-inventory-management
 veinminer
+villager-market
 visible-armor-slots
+v-tweaks
+waddles
 waila
 waila-harvestability
 waila-plugins
 wawla-what-are-we-looking-at
+waystones
 wearable-backpacks
 well-fed
+worldgeneration-profiler
+world-primer
+xtones
+zoesteria-valoegheses-basic-expansions
