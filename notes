@@ -1,3 +1,144 @@
+pre-generate world?
+  chunkpregenerator
+
+can use settings to flattten bedrock? or need use betterbedrockgen?
+
+
+==============================================================================
+
+shader:
+  Sildurs
+  https://sildurs-shaders.github.io
+
+resourcepack:
+  atlas.graphics - Pulchra
+
+modpacks to examine:
+  life-in-the-village
+  minecolonies-testpack
+  minecolonies-getting-started
+  realistic-colonies
+  colonial-age
+  minimalist-minecolonies
+
+==============================================================================
+
+Need to fix manage-mod to handle:
+
+advanced-finders
+betterportals
+forgeendertech
+journeymap
+large-ore-deposits
+
+Not available on curseforge:
+
+!http://chocolateminecraft.com/betterpvp.html
+!http://chocolateminecraft.com/worldmap.html
+!http://optifine.net/downloads
+
+mo-creatures:
+  - requires custom-mob-spawner, which isn't updated on forge
+
+==============================================================================
+
+Notes for a mod:
+
 Streams:
   Forum: https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/2346379-streams-real-flowing-rivers
   To find a stream search for '[streams] River at tp' in the latest.log.
+
+==============================================================================
+
+actually-additions
+additional-structures
+advanced-chimneys
+backpacks
+baubles
+better-builders-wands
+better-with-addons
+bibliocraft
+bibliocraft-bibliowoods-biomes-oplenty-edition
+blockdispenser
+buildcraft
+bwm-suite
+chisel
+chisels-bits
+climate-control-geographicraft
+clumps
+convenient-additions
+craftingcraft
+craftingtable-iv
+crafting-tweaks
+death-compass
+decocraft2
+diamond-lucky-block
+dynamic-surroundings
+dynamic-surroundings-huds
+ender-lucky-block-armory-update
+endertanks
+enhanced-mob-spawners
+exotic-birds
+external-tweaker
+extra-utilities
+ferdinands-flowers
+finder-compass
+find-your-way
+guidebook
+helpfixer
+holoinventory
+hopper-ducts
+infinitefluids
+infinitely-spreading-water
+ingame-info-xml
+ivtoolkit
+just-enough-calculation
+just-enough-dimensions
+just-enough-items-jei
+kleeslabs
+large-veins
+lepton
+lots-of-things
+lucky-block-pink
+minecolonies
+minetweaker3
+mo-bends
+more-fuels-mod
+mo-villages
+multistorage
+natures-compass
+omlib
+pillar
+platforms
+pyramid-plunder
+quick-leaf-decay
+randomconfigs
+randompatches
+randomtweaks
+realbench
+realistic-item-drops
+recubed
+recurrent-complex
+refined-relocation-2
+scenter-mod
+serene-seasons
+shadowfacts-forgelin
+shoulder-surfing-reloaded
+simpleharvest
+smarthoppers-mod
+sound-filters
+super-crafting-frame
+techno-lucky-block
+terraqueous
+terrarium
+the-redstone-lucky-block
+tidychunk
+time-speed-mod
+tiny-progressions
+trashslot
+treasure2
+utility-worlds
+veinminer
+visible-armor-slots
+wearable-backpacks
+well-fed
