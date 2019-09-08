@@ -30,8 +30,7 @@ my $DL_BASE_URL  = 'https://media.forgecdn.net/files';
 my $MOD_API1_URL = "$API_BASE_URL/minecraft/mc-mods";
 my $MOD_API2_URL = "$API_BASE_URL/mc-mods/minecraft";
 
-my $SCRAPE_URL = "$MAIN_CF_URL/minecraft";
-
+my $SCRAPE_URL   = "$MAIN_CF_URL/minecraft";
 my $MOD_BASE_URL = "$SCRAPE_URL/mc-mods";
 
 my $IN_QUEUE_SLEEP    = 30;
@@ -242,7 +241,7 @@ sub _get_relations {
   # CurseForge doesn't return an error when requesting a page that doesn't
   # exist, so we have to find out how many pages there are.
 
-  my ( $html, $rc, $message ) = get_html( "${relation_url}1" );
+  my ( $html, $rc, $message ) = get_html( "${relation_url}" );
   return 1 unless $rc == 200 || $rc == 0;
 
   my $pagelinks = $html->findClass( 'pagination-item' )->array;
@@ -280,7 +279,7 @@ sub _get_relations {
 
 sub _get_dependencies {
   my ( $modname ) = @_;
-  my $dependency_url = "$MOD_BASE_URL/$modname/relations/dependencies?page=";
+  my $dependency_url = "$MOD_BASE_URL/$modname/relations/dependencies?filter-related-dependencies=3";
   return _get_relations( $dependency_url );
 }
 

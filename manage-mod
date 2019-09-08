@@ -6,6 +6,16 @@ use strictures 2;
 
 # XXX: create main ManageMod module and do most of the setup there.
 # XXX: Move config to ManageMod::Config
+# XXX: Allow for include config (have a global modules config, groupings of mod types, etc.)
+# XXX: App::CLI::Plugin::ParallelForkManager
+# XXX: Add option to mark a mod as 'already tried, won't use'
+# XXX: Allow for option to updated cache without updating links
+# XXX: Add command line options:
+#        add/update (subtypes, resourcepacks, shaders, etc.),
+#        list
+#        ???
+# XXX: add options for settings (see option* in minecraft instance base folder)
+# XXX: https://stackoverflow.com/questions/1183876/what-are-the-best-practices-for-implementing-a-cli-tool-in-perl
 
 BEGIN {
   use FindBin qw( $RealBin $RealScript );
@@ -47,7 +57,7 @@ sub link_jar {
   my $data = get_mod_data( $mod, $config->{mc_version}, $config->{channels} );
   $config->{mods}{$mod}{$_} = $data->{download}{$_} for @wanted;
 
-  my $target = "$config->{directory}/$config->{mods}{$mod}{filename}";
+  my $target = "$config->{directory}/mods/$config->{mods}{$mod}{filename}";
   my $source = $data->{download}{local_url};
 
   if ( -e $target ) {
@@ -67,7 +77,7 @@ sub link_jar {
 
     }
   } else {
-    die $log->fatalf( 'could not create symbolic link for %s', $mod )
+    die $log->fatalf( 'could not create symbolic link for %s (%s -> %s)', $mod, $target, $source )
       unless symlink $source, $target;
   }
 
@@ -79,7 +89,10 @@ sub link_jar {
 
 #-----------------------------------------------------------------------------
 #my $config_file = './mods.cfg';
-my $config_file = './test-single-mods.cfg';
+#my $config_file = './test-single-mods.cfg';
+my $config_file = './test-multiple-mods.cfg';
+#my $config_file = './open-terrain-generator.cfg';
+#my $config_file = './terrarium.cfg';
 $config = LoadFile( $config_file );
 
 my @expected_config = qw( mc_version channels directory mods );
