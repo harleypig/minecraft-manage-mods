@@ -16,6 +16,7 @@ use strictures 2;
 #        ???
 # XXX: add options for settings (see option* in minecraft instance base folder)
 # XXX: https://stackoverflow.com/questions/1183876/what-are-the-best-practices-for-implementing-a-cli-tool-in-perl
+# XXX: http://catb.org/esr/writings/taoup/html/ch11s06.html
 
 BEGIN {
   use FindBin qw( $RealBin $RealScript );
