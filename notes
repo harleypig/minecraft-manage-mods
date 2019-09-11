@@ -4,13 +4,16 @@ pre-generate world?
 can use settings to flattten bedrock? or need use betterbedrockgen?
   use cofh world to flatten bedrock see config/cofh/world/config.cfg
 
+Interesting texture pack for 1.14:
+  https://www.meseasonstexturepack.com/
+
 ==============================================================================
 Create web page (mc.harleypig.com), server (mc.harleypig.com)
 
 web page links to reviews of modules (static html?), current configuration, etc.
 
 ==============================================================================
-Series:
+Possible Series:
   Standalone Mods
   Pam's HarvestCraft
   Better With Mods
@@ -93,7 +96,9 @@ baubles
 bed-bugs
 bed-patch
 better-advancements
+better-animations-collection-2
 better-builders-wands
+betterportals
 better-title-screen
 better-with-addons
 bibliocraft
@@ -114,12 +119,15 @@ chisels-bits
 climate-control-geographicraft
 clipboard
 clumps
+cmdcam
 colorutility
+colytra
 comforts
 compressed-items
 controlling
 convenient-additions
 cooking-for-blockheads
+corpse
 cplpibalds-tweaks
 craftingcraft
 craftingtable-iv
@@ -129,6 +137,7 @@ ctm
 custom-backgrounds
 custom-main-menu
 custom-npcs
+deadly-world
 death-compass
 deathquotes-death-quotes
 decocraft2
@@ -189,6 +198,7 @@ just-enough-dimensions
 just-enough-harvestcraft
 just-enough-items-jei
 just-enough-resources-jer
+just-fashion
 just-sleep
 kleeslabs
 laggoggles
@@ -196,6 +206,7 @@ landlust-furniture
 lapis-stays-in-the-enchanting-table
 large-veins
 lepton
+let-sleeping-dogs-lie
 lever-button-lights
 light-level-overlay-reloaded
 loading-profiler
@@ -203,6 +214,7 @@ lootbags
 lots-of-things
 lucky-block-pink
 main-menu-scale
+metal-barrels
 millenaire
 minecolonies
 minefactory-reloaded
@@ -217,6 +229,7 @@ more-beautiful-plates
 more-fuels-mod
 more-furnaces
 mo-villages
+multi-mine
 multistorage
 natures-compass
 neat
@@ -234,6 +247,7 @@ ore-excavation
 paintings
 pams-get-all-the-seeds
 pams-harvestcraft
+patchwork
 pickle-tweaks
 pillar
 ping
@@ -282,16 +296,19 @@ super-crafting-frame
 techno-lucky-block
 terraqueous
 terrarium
+the-lost-cities
 the-redstone-lucky-block
 thermal-dynamics
 thermal-expansion
 thermal-foundation
+thicc-entities
 tidychunk
 time-speed-mod
 tiny-progressions
 toast-control
 torch-optimizer
 trashslot
+travellers-backpack
 treasure2
 utility-worlds
 vanilla-builders-extension
@@ -311,7 +328,10 @@ wawla-what-are-we-looking-at
 waystones
 wearable-backpacks
 well-fed
+wesleys-roguelike-dungeons
+wildnature
 worldgeneration-profiler
 world-primer
 xtones
+yungs-better-caves
 zoesteria-valoegheses-basic-expansions
