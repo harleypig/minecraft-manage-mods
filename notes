@@ -14,6 +14,7 @@ web page links to reviews of modules (static html?), current configuration, etc.
 
 ==============================================================================
 Possible Series:
+  Non-game mods (better-title-screen)
   Standalone Mods
   Pam's HarvestCraft
   Better With Mods
@@ -23,12 +24,46 @@ Possible Series:
 ==============================================================================
 Create my own categories on top of curseforge:
 
-pregame: Mods like better-title-screen
+Curseforge existing:
 
-utility: Mods like openeye or loading-profiler
+{
+  'Addons' =>  {
+    modname => 'filename'
+  },
+  'Adventure and RPG' =>  {},
+  'Armor, Tools and Weapons' =>  {},
+  'Cosmetic' =>  {},
+  'Food' =>  {},
+  'Magic' =>  {},
+  'Map and Information' =>  {},
+  'Miscellaneous' =>  {},
+  'Redstone' =>  {},
+  'Server Utility' =>  {},
+  'Storage' =>  {},
+  'Technology' =>  {
+    'Processing' =>  {},
+    'Player Transport' =>  {},
+    'Energey, Fluid and Item Transport' =>  {},
+    'Farming' =>  {},
+    'Energy' =>  {
+        'Redstone' => {},
+      },
+    'Genetics' => {},
+  },
+  'World Gen' =>  {
+    'Biomes' =>  {},
+    'Ores and Resources' =>  {},
+    'Structures' =>  {},
+    'Dimensions' =>  {},
+    'Mobs' => {},
+  }
+}
 
-worldgen-invisible: mods that don't require the user to learn new stuff, or
-give the player new capabilities, like streams or betterbedrockgen
+nongame: Mods like better-title-screen (see nongame.category)
+
+worldgen-invisible: maybe call it 'Environment'. mods that don't require the
+user to learn new stuff, or give the player new capabilities. like streams or
+betterbedrockgen
 
 worldgen-just-is: mods that give the player new capabilities but no new
 objects
@@ -104,7 +139,6 @@ better-builders-wands
 betternether
 betterportals
 better-slabs
-better-title-screen
 better-with-addons
 bibliocraft
 bibliocraft-bibliowoods-biomes-oplenty-edition
@@ -130,7 +164,6 @@ colorutility
 colytra
 comforts
 compressed-items
-controlling
 convenient-additions
 cooking-for-blockheads
 corpse
@@ -140,19 +173,15 @@ craftingtable-iv
 crafting-tweaks
 crafttweaker
 ctm
-custom-backgrounds
-custom-main-menu
 custom-npcs
 deadly-world
 death-compass
 deathquotes-death-quotes
 decocraft2
-default-options
 dense-ores
 desirepaths
 diamond-glass
 diamond-lucky-block
-ding
 dirt-deco
 doggy-talents
 durability-show
@@ -219,7 +248,6 @@ lepton
 let-sleeping-dogs-lie
 lever-button-lights
 light-level-overlay-reloaded
-loading-profiler
 lootbags
 lots-of-things
 lucky-block-pink
