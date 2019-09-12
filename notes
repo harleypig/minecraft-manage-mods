@@ -87,7 +87,10 @@ additional-structures
 advanced-chimneys
 ai-improvements
 akashic-tome
+ama-damage-indicator
+animania
 aquaculture
+archimedes-ships
 armorplus
 atlcraft-candles-mod
 atop
@@ -98,7 +101,9 @@ bed-patch
 better-advancements
 better-animations-collection-2
 better-builders-wands
+betternether
 betterportals
+better-slabs
 better-title-screen
 better-with-addons
 bibliocraft
@@ -116,6 +121,7 @@ charm
 chest-transporter
 chisel
 chisels-bits
+clay-soldiers-mod
 climate-control-geographicraft
 clipboard
 clumps
@@ -156,6 +162,7 @@ earthworks
 ender-lucky-block-armory-update
 endertanks
 enhanced-mob-spawners
+enhancedvisuals
 exotic-birds
 expandedbonemeal
 external-tweaker
@@ -163,6 +170,7 @@ extra-alchemy
 extra-utilities
 ezstorage-2
 familiar-fauna
+far-from-home
 farming-for-blockheads
 faster-ladder-climbing
 fastfurnace
@@ -175,6 +183,7 @@ find-your-way
 foamfix-for-minecraft
 giselbaers-durability-viewer
 guidebook
+hated-mobs
 helpfixer
 holoinventory
 hopper-ducts
@@ -201,6 +210,7 @@ just-enough-resources-jer
 just-fashion
 just-sleep
 kleeslabs
+ladysnake-illuminations
 laggoggles
 landlust-furniture
 lapis-stays-in-the-enchanting-table
@@ -223,11 +233,14 @@ minetweaker-recipemaker
 missing-pieces
 mmd-orespawn
 mo-bends
+mo-creatures
 modtweaker
 more-beautiful-buttons
 more-beautiful-plates
 more-fuels-mod
 more-furnaces
+more-player-models
+mouse-tweaks
 mo-villages
 multi-mine
 multistorage
@@ -282,7 +295,9 @@ simple-achievements
 simpleharvest
 simple-storage-network
 smarthoppers-mod
+smart-hud
 snad
+snow-accumulation
 sophisticated-wolves
 sound-filters
 spartan-shields
@@ -296,6 +311,8 @@ super-crafting-frame
 techno-lucky-block
 terraqueous
 terrarium
+the-aether
+the-camping-mod
 the-lost-cities
 the-redstone-lucky-block
 thermal-dynamics
@@ -306,12 +323,15 @@ tidychunk
 time-speed-mod
 tiny-progressions
 toast-control
+torch-lever
 torch-optimizer
+torohud
 trashslot
 travellers-backpack
 treasure2
 utility-worlds
 vanilla-builders-extension
+vanillafix
 vanillafoodpantry-mod
 vanilla-tools
 vanillatweaks
@@ -319,6 +339,7 @@ vaultopic-early-inventory-management
 veinminer
 villager-market
 visible-armor-slots
+visuals
 v-tweaks
 waddles
 waila
@@ -327,8 +348,10 @@ waila-plugins
 wawla-what-are-we-looking-at
 waystones
 wearable-backpacks
+weather-storms-tornadoes
 well-fed
 wesleys-roguelike-dungeons
+whats-that-slot
 wildnature
 worldgeneration-profiler
 world-primer
