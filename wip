@@ -48,8 +48,8 @@ use ManageMod::CLI;
 
 unshift @ARGV, 'help' unless @ARGV;
 
-#ManageMod::CLI->dispatch;
+ManageMod::CLI->dispatch;
 
-my $mm = ManageMod::CLI->new;
+#my $mm = ManageMod::CLI->new;
 
 print '?';
