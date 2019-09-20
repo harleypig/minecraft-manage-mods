@@ -1,3 +1,6 @@
+## Please see file perltidy.ERR
+## Please see file perltidy.ERR
+## Please see file perltidy.ERR
 package ManageMod::Config;
 
 ## no critic
@@ -14,7 +17,9 @@ $YAML::XS::Boolean = 'JSON::PP';
 $YAML::XS::Indent  = 2;
 
 our $defaults = {
-  _self => {},
+  _self => {
+    _config_modified => 0,
+  },
 
   _configs => {
     channels   => [qw( release )],
@@ -78,7 +83,7 @@ sub _merge_configs {
   die 'bad configs key'
     if exists $self->{_configs} && ref $self->{_configs} ne 'ARRAY';
 
-  my $config = $defaults->{_configs};
+  my $config = { %{ $defaults->{_configs} } };
 
   my $m = Hash::Merge->new( 'RIGHT_PRECEDENT' );
 
@@ -107,6 +112,12 @@ sub load_config {
   my ( $self ) = @_;
 
   $self->_load_config( $self->configfile );
+
+  # If _configs is 0, then we're starting from scratch, put in a default.
+
+  $self->{_configs} = [ { %{ $defaults->{_configs} } } ]
+    unless @{ $self->{_configs} };
+
   $self->_merge_configs;
 
   return 1;
@@ -117,13 +128,23 @@ sub save { $_[0]->save_config }
 sub save_config {
   my ( $self ) = @_;
 
-  # If _configs[0] is empty, then we are creating a default config.
-  my $cfg = $self->{_configs}[0] || $self->{config};
-
-  DumpFile( $self->configfile, $cfg );
+  DumpFile( $self->configfile, $self->{_configs}[0] );
 
   warn sprintf "%s saved\n", $self->configfile;
   return 1;
+}
+
+sub set {
+  my ( $self, $field, $value ) = @_;
+  $self->{_configs}[0]{$field} = $value;
+  $self->{_config_modified} = 1;
+}
+
+sub modified { $_[0]->{_config_modified} }
+
+sub set_mc_version {
+  my ( $self, $value ) = @_;
+  $self->set( 'mc_version', $value );
 }
 
 1;

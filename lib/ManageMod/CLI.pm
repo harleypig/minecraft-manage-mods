@@ -5,6 +5,8 @@ package ManageMod::CLI;
 use strictures 2;
 use base qw(App::CLI App::CLI::Command);
 
+use List::MoreUtils 'any';
+
 use ManageMod::Config;
 
 our $VERSION = '0.01';
@@ -19,7 +21,11 @@ use constant alias => (
   'help'   => '+App::CLI::Command::Help',
 );
 
-use constant global_options => ( 'c|config=s' => 'configfile' );
+use constant global_options => (
+  'c|config=s' => 'configfile',
+  's|save!'    => 'saveconfig',
+  'd|dump!'    => 'dumpconfig',
+);
 
 ##############################################################################
 # Add my own functions to App::CLI::Command object
@@ -31,7 +37,8 @@ use File::Basename 'basename';
 use Hash::Merge 'merge';
 
 our $defaults = {
-#  configfile => 'manage-mod.cfg',
+  saveconfig => 1,
+  dumpconfig => 0,
 };
 
 {
@@ -41,8 +48,6 @@ our $defaults = {
   sub new {
     my ( $class, @global_args ) = @_;
 
-    #my %args = %{ merge( $defaults, {@global_args} ) };
-    #my $self = bless \%args, $class;
     my $self = bless merge( $defaults, {@global_args} ), $class;
 
     # Set defaults based on how we are running
@@ -50,43 +55,67 @@ our $defaults = {
 
     my $cfg_args = { 'configfile' => $self->configfile };
 
-    #$cfg_args->{create} = 1
-    #  if $class eq 'ManageMod::CLI::Config' && lc $ARGV[0] eq 'create';
-
     $self->{'config'} = ManageMod::Config->new( $cfg_args );
 
     return $self;
-  } ## end sub new
+  }
 
   sub run {
     my ( $self ) = @_;
-    my $cmd = shift @ARGV;
+    my $subcmd = shift @ARGV;
 
-    $self->help if !defined $cmd || $cmd eq '';
-    $self->can( $cmd ) ? $self->$cmd : $self->unknown_cmd( $cmd );
+    $self->help if !defined $subcmd || $subcmd eq '';
+
+    if ( $self->can( 'subcommands_todo') ) {
+      $self->not_implemented( $subcmd )
+        if grep { /^$subcmd$/i } $self->subcommands_todo;
+    }
+
+    $self->unknown_cmd( $subcmd  ) unless $self->can( $subcmd );
+
+    $self->$subcmd( @ARGV );
+
+    $DB::single++;
+
+    $self->config->save if $self->saveconfig;
+    $self->config->dump if $self->dumpconfig;
   }
+
+  #sub run {
+  #  my ( $self ) = @_;
+  #
+  #my $subcmd = shift @ARGV;
+  #
+  #$self->help if !defined $subcmd || $subcmd eq '';
+  #
+  #$self->unknown_subcmd( $subcmd ) if none { /^$subcmd$/ } @subcommands;
+  #$self->not_implemented( $subcmd ) unless $self->can( $subcmd );
+  #$self->$cmd( shift @ARGV );
+  #}
 
 }
 
 # Convenience methods
-sub config { $_[0]->{config} }
+sub config     { $_[0]->{config} }
 sub configfile { $_[0]->{configfile} }
+sub saveconfig { $_[0]->{saveconfig} }
+sub dumpconfig { $_[0]->{dumpconfig} }
 
 # What command are we running as?
 sub command { lc basename( $_[0]->filename, '.pm' ) }
 
 sub unknown_cmd {
-  my ( $self ) = @_;
-
-  my $command = $self->command;
-  my $attempt = $self->{app}{app_argv}[0];
-
-  die "Unknown command for $command: $attempt\n";
+  my ( $self, $attempt ) = @_;
+  die sprintf "Unknown command for %s: %s\n", $self->command, $attempt;
 }
 
-sub help {
+sub not_implemented {
+  my ( $self, $cmd ) = @_;
+  die sprintf "%s %s %s is not implemented\n", $self->prog_name, $self->command, $cmd;
+}
 
-  # require App::CLI::Command::Help?
+# require App::CLI::Command::Help?
+sub help {
   my ( $self ) = @_;
   die "Help yourself!\n";
 }

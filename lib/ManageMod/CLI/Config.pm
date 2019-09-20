@@ -4,8 +4,6 @@ package ManageMod::CLI::Config;
 
 use base 'App::CLI::Command';
 
-#use constant subcommands => qw( Create );
-
 sub save {
   my ( $self ) = @_;
   $self->config->save;
