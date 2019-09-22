@@ -1,6 +1,3 @@
-## Please see file perltidy.ERR
-## Please see file perltidy.ERR
-## Please see file perltidy.ERR
 package ManageMod::Config;
 
 ## no critic
@@ -9,7 +6,7 @@ use strictures 2;
 use namespace::clean;
 
 #use YAML::Syck qw( LoadFile DumpFile );
-use YAML::XS qw( LoadFile DumpFile );
+use YAML::XS qw( LoadFile DumpFile Dump );
 use Hash::Merge;
 use List::MoreUtils 'uniq';
 
@@ -123,6 +120,7 @@ sub load_config {
   return 1;
 }
 
+sub dump { print Dump $_[0]->{_configs}[0] }
 sub save { $_[0]->save_config }
 
 sub save_config {
@@ -131,20 +129,26 @@ sub save_config {
   DumpFile( $self->configfile, $self->{_configs}[0] );
 
   warn sprintf "%s saved\n", $self->configfile;
+  $self->{_config_modified} = 0;
   return 1;
-}
-
-sub set {
-  my ( $self, $field, $value ) = @_;
-  $self->{_configs}[0]{$field} = $value;
-  $self->{_config_modified} = 1;
 }
 
 sub modified { $_[0]->{_config_modified} }
 
-sub set_mc_version {
-  my ( $self, $value ) = @_;
-  $self->set( 'mc_version', $value );
+sub set {
+  my ( $self, $name, $value ) = @_;
+  $self->{_configs}[0]{$name} = $value;
+  $self->_merge_configs;
+  $self->{_config_modified} = 1;
+  return 1;
+}
+
+sub delete {
+  my ( $self, $name ) = @_;
+  delete $self->{_configs}[0]{$name};
+  $self->_merge_configs;
+  $self->{_config_modified} = 1;
+  return 1;
 }
 
 1;

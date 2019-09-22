@@ -4,9 +4,20 @@ package ManageMod::CLI::Config;
 
 use base 'App::CLI::Command';
 
-sub save {
+use constant options => (
+
+);
+
+sub default_subcmd {
   my ( $self ) = @_;
-  $self->config->save;
+  $self->{dumpconfig} = 1;
+  return 1;
+}
+
+sub mcversion {
+  my ( $self ) = @_;
+  $DB::single++;
+  print '?';
 }
 
 1;

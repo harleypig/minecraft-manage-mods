@@ -35,9 +35,10 @@ use strictures 2;
 
 use File::Basename 'basename';
 use Hash::Merge 'merge';
+use Hash::Merge::Extra 'R_ADDITIVE';
 
 our $defaults = {
-  saveconfig => 1,
+  saveconfig => 0,
   dumpconfig => 0,
 };
 
@@ -48,14 +49,19 @@ our $defaults = {
   sub new {
     my ( $class, @global_args ) = @_;
 
-    my $self = bless merge( $defaults, {@global_args} ), $class;
+    my $m = Hash::Merge->new();
+    $m->add_behavior_spec(Hash::Merge::Extra::R_ADDITIVE, "R_ADDITIVE");
+    my %self = %{ $m->merge( $defaults, {@global_args} ) };
+    my $self = bless \%self, $class;
 
     # Set defaults based on how we are running
     $self->{configfile} //= $self->prog_name . '.cfg';
 
-    my $cfg_args = { 'configfile' => $self->configfile };
+    my $cfg_args = { 'configfile' => $self->{configfile} };
 
     $self->{'config'} = ManageMod::Config->new( $cfg_args );
+
+    delete $self->{configfile};
 
     return $self;
   }
@@ -64,42 +70,32 @@ our $defaults = {
     my ( $self ) = @_;
     my $subcmd = shift @ARGV;
 
-    $self->help if !defined $subcmd || $subcmd eq '';
+    if ( !defined $subcmd || $subcmd eq '' ) {
+      $self->can( 'default_subcmd' ) ? $self->default_subcmd : $self->help;
 
-    if ( $self->can( 'subcommands_todo') ) {
-      $self->not_implemented( $subcmd )
-        if grep { /^$subcmd$/i } $self->subcommands_todo;
+    } else {
+
+      if ( $self->can( 'subcommands_todo' ) ) {
+        $self->not_implemented( $subcmd )
+          if grep { /^$subcmd$/i } $self->subcommands_todo;
+      }
+
+      $self->unknown_cmd( $subcmd ) unless $self->can( $subcmd );
+
+      $self->$subcmd( @ARGV );
     }
-
-    $self->unknown_cmd( $subcmd  ) unless $self->can( $subcmd );
-
-    $self->$subcmd( @ARGV );
-
-    $DB::single++;
 
     $self->config->save if $self->saveconfig;
     $self->config->dump if $self->dumpconfig;
-  }
-
-  #sub run {
-  #  my ( $self ) = @_;
-  #
-  #my $subcmd = shift @ARGV;
-  #
-  #$self->help if !defined $subcmd || $subcmd eq '';
-  #
-  #$self->unknown_subcmd( $subcmd ) if none { /^$subcmd$/ } @subcommands;
-  #$self->not_implemented( $subcmd ) unless $self->can( $subcmd );
-  #$self->$cmd( shift @ARGV );
-  #}
-
+  } ## end sub run
 }
 
 # Convenience methods
 sub config     { $_[0]->{config} }
-sub configfile { $_[0]->{configfile} }
 sub saveconfig { $_[0]->{saveconfig} }
 sub dumpconfig { $_[0]->{dumpconfig} }
+
+sub configfile { $_[0]->config->configfile }
 
 # What command are we running as?
 sub command { lc basename( $_[0]->filename, '.pm' ) }
@@ -117,7 +113,7 @@ sub not_implemented {
 # require App::CLI::Command::Help?
 sub help {
   my ( $self ) = @_;
-  die "Help yourself!\n";
+  die "Sorry. Help has not been implemented.\n";
 }
 
 1;
