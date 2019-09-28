@@ -116,4 +116,9 @@ sub help {
   die "Sorry. Help has not been implemented.\n";
 }
 
+#-----------------------------------------------------------------------------
+# Routines specific to the ManageMod project.
+
+sub mcversion { $_[0]->config->get('mc_version') }
+
 1;

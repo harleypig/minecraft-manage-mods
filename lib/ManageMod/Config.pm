@@ -120,10 +120,11 @@ sub load_config {
   return 1;
 }
 
-sub dump { print Dump $_[0]->{_configs}[0] }
-sub save { $_[0]->save_config }
+sub dump     { print Dump $_[0]->{_configs}[0] }
+sub get      { $_[0]->{config}{ $_[1] } }
+sub modified { $_[0]->{_config_modified} }
 
-sub save_config {
+sub save {
   my ( $self ) = @_;
 
   DumpFile( $self->configfile, $self->{_configs}[0] );
@@ -132,8 +133,6 @@ sub save_config {
   $self->{_config_modified} = 0;
   return 1;
 }
-
-sub modified { $_[0]->{_config_modified} }
 
 sub set {
   my ( $self, $name, $value ) = @_;
@@ -148,6 +147,40 @@ sub delete {
   delete $self->{_configs}[0]{$name};
   $self->_merge_configs;
   $self->{_config_modified} = 1;
+  return 1;
+}
+
+sub add {
+  my ( $self, $name, $el ) = @_;
+
+  if ( exists $self->{_configs}[0]{$name} ) {
+    my $ref = ref $self->{_configs}[0]{$name};
+
+    if ( $ref eq 'ARRAY' ) {
+      $self->_add_to_array( $name, $el );
+
+    } elsif ( $ref eq 'HASH' ) {
+      die "haven't written support for hashes in config add yet";
+
+    } elsif ( $ref ne '' ) {
+      die "ref type $ref not supported in config add";
+
+    } else {
+      $self->{_configs}[0]{$name} .= $el;
+
+    }
+  } else {
+    return $self->set( $name, $el );
+  }
+}
+
+sub _add_to_array {
+  my ( $self, $name, $el ) = @_;
+
+  die "$name is not an array ref"
+    unless ref $self->{_configs}[0]{$name} eq 'ARRAY';
+
+  push @{ $self->{_configs}[0]{$name} }, $el;
   return 1;
 }
 
