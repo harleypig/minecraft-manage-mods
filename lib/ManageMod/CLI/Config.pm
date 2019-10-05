@@ -5,6 +5,7 @@ package ManageMod::CLI::Config;
 use base 'App::CLI::Command';
 
 use constant options => ( 'remove!' => 'remove' );
+use constant subcommands_todo => [qw( include mods directory )];
 
 sub default_subcmd {
   my ( $self ) = @_;
@@ -24,23 +25,26 @@ sub mcversion {
     die "no extra parameters can be used with --remove, nothing removed\n"
       if @ARGV;
 
-    $self->config->delete( 'mc_version' );
+    $self->config->delete( 'mcversion' );
+    return 1;
 
   } elsif ( @ARGV ) {
     my $mcv = shift @ARGV;
-    $self->config->set( 'mc_version', $mcv );
+    $self->config->set( 'mcversion', $mcv );
 
     warn "extra parameters ignored\n"
       if @ARGV;
 
-  } elsif ( $self->remove ) {
+    return 0;
 
   } else {
-    $self->{saveconfig} = 0;
-    $self->{dumpconfig} = 0;
-
-    printf "%s\n", $self->SUPER::mcversion;
+    printf "%s\n", $self->config->mcversion;
   }
 } ## end sub mcversion
+
+sub channels {
+  # remove one or more channels
+  # add one or more channels
+}
 
 1;

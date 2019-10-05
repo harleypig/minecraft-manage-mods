@@ -2,42 +2,6 @@
 
 ## no critic
 
-# App::CLI provides these methods
-#
-# x  app_argv        (via App::CLI)
-# x  app             (via App::CLI::Command)
-# x  brief_usage     (via App::CLI::Command)
-# x  cascadable      (via App::CLI::Command)
-# x  cascading       (via App::CLI::Command)
-# x  cmd_map         (via App::CLI)
-# x  command_options (via App::CLI::Command)
-# x  commands        (via App::CLI::Helper)
-# x  dispatch        (via App::CLI)
-# x  error_cmd       (via App::CLI)
-# x  error_opt       (via App::CLI)
-# x  filename        (via App::CLI::Command)
-# x  files           (via App::CLI::Helper)
-# x  get_cmd         (via App::CLI)
-# x  get_opt         (via App::CLI)
-# x  loc_text        (via App::CLI::Command)
-# x  opt_map         (via App::CLI)
-# x  prepare         (via App::CLI)
-# x  prog_name       (via App::CLI::Helper)
-# x  run_command     (via App::CLI::Command)
-# x  subcommand      (via App::CLI::Command)
-# x  usage           (via App::CLI::Command)
-
-# Constants (use constant ...)
-#   alias           (via App::CLI)
-#   global_options  (via App::CLI)
-#   options         (via App::CLI)
-#   subcommands     (via App::CLI::Command)
-
-# 'run' is an abstract method that must be created in the command module
-# (.e.g, ManageMod::CLI::Add)
-#
-#   run             (via App::CLI::Command)
-
 use strictures 2;
 
 use FindBin qw( $RealBin );
@@ -49,7 +13,3 @@ use ManageMod::CLI;
 unshift @ARGV, 'help' unless @ARGV;
 
 ManageMod::CLI->dispatch;
-
-#my $mm = ManageMod::CLI->new;
-
-print '?';

@@ -42,29 +42,36 @@ our $defaults = {
   dumpconfig => 0,
 };
 
+our $default_config = {
+  channels  => [qw( alpha )],
+  directory => '/path/to/mods/dir',
+  mcversion => -1,
+  mods      => [],
+};
+
 {
   no warnings 'redefine';
 
-  ## Add configuration when instantiating an object
   sub new {
     my ( $class, @global_args ) = @_;
 
     my $m = Hash::Merge->new();
-    $m->add_behavior_spec(Hash::Merge::Extra::R_ADDITIVE, "R_ADDITIVE");
+    $m->add_behavior_spec( Hash::Merge::Extra::R_ADDITIVE, "R_ADDITIVE" );
     my %self = %{ $m->merge( $defaults, {@global_args} ) };
     my $self = bless \%self, $class;
 
     # Set defaults based on how we are running
     $self->{configfile} //= $self->prog_name . '.cfg';
 
-    my $cfg_args = { 'configfile' => $self->{configfile} };
+    my $cfg_args = {
+      configfile => delete $self->{configfile},
+      default_config => $default_config,
+    };
 
     $self->{'config'} = ManageMod::Config->new( $cfg_args );
 
-    delete $self->{configfile};
-
     return $self;
-  }
+  } ## end sub new
 
   sub run {
     my ( $self ) = @_;
@@ -75,15 +82,27 @@ our $defaults = {
 
     } else {
 
-      if ( $self->can( 'subcommands_todo' ) ) {
-        $self->not_implemented( $subcmd )
-          if grep { /^$subcmd$/i } $self->subcommands_todo;
+      my $can = $self->can( $subcmd );
+
+      my $todo = 0;
+      $todo = grep { /^$subcmd$/i } @{ $self->subcommands_todo }
+        if $self->can( 'subcommands_todo' );
+
+      die "$subcmd is marked as todo but has a method defined\n"
+        if $todo && $can;
+
+      if ( $todo ) {
+        $self->not_implemented( $subcmd );
+
+      } elsif ( $can ) {
+        $self->$can();
+
+      } else {
+        $self->unknown_cmd( $subcmd );
       }
+    } ## end else [ if ( !defined $subcmd ...)]
 
-      $self->unknown_cmd( $subcmd ) unless $self->can( $subcmd );
-
-      $self->$subcmd( @ARGV );
-    }
+    $DB::single++;
 
     $self->config->save if $self->saveconfig;
     $self->config->dump if $self->dumpconfig;
@@ -115,10 +134,5 @@ sub help {
   my ( $self ) = @_;
   die "Sorry. Help has not been implemented.\n";
 }
-
-#-----------------------------------------------------------------------------
-# Routines specific to the ManageMod project.
-
-sub mcversion { $_[0]->config->get('mc_version') }
 
 1;

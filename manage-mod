@@ -55,7 +55,7 @@ my @wanted = qw( filename filesize md5sum );
 sub link_jar {
   my ( $mod ) = @_;
 
-  my $data = get_mod_data( $mod, $config->{mc_version}, $config->{channels} );
+  my $data = get_mod_data( $mod, $config->{mcversion}, $config->{channels} );
   $config->{mods}{$mod}{$_} = $data->{download}{$_} for @wanted;
 
   my $target = "$config->{directory}/mods/$config->{mods}{$mod}{filename}";
@@ -96,7 +96,7 @@ my $config_file = './test-multiple-mods.cfg';
 #my $config_file = './terrarium.cfg';
 $config = LoadFile( $config_file );
 
-my @expected_config = qw( mc_version channels directory mods );
+my @expected_config = qw( mcversion channels directory mods );
 
 my @missing;
 

@@ -19,31 +19,85 @@ our $defaults = {
   },
 
   _configs => {
-    channels   => [qw( release )],
-    directory  => '/path/to/mods/dir',
-    mc_version => -1,
-    mods       => [],
+    channels  => [qw( release )],
+    directory => '/path/to/mods/dir',
+    mcversion => -1,
+    mods      => [],
   },
 };
 
+##############################################################################
 sub new {
   my ( $class, $args ) = @_;
 
   die 'new for ManageMod::Config requires hash ref'
     if defined $args && ref $args ne 'HASH';
 
-  my $self = bless Hash::Merge::merge( $defaults->{_self}, $args || {} ), $class;
+  $args //= {};
 
-  $self->load_config;
+  my $self = bless Hash::Merge::merge( $defaults->{_self}, $args ), $class;
+
+  $self->_load_config( $self->configfile );
+  $self->_merge_configs;
 
   return $self;
+} ## end sub new
+
+sub dump { print Dump $_[0]->{config} }
+
+##############################################################################
+# Methods
+
+sub save {
+  my ( $self ) = @_;
+  DumpFile( $self->configfile, $self->{_configs}[0] );
+  warn sprintf "%s saved\n", $self->configfile;
+  $self->{_config_modified} = 0;
+  return 1;
 }
 
-sub configfile {
-  my ( $self ) = @_;
-  warn "no configfile set\n" unless exists $self->{configfile};
-  $self->{configfile};
+sub set {
+  my ( $self, $name, $value ) = @_;
+  $self->{_configs}[0]{$name} = $value;
+  $self->_merge_configs;
+  $self->{_config_modified} = 1;
+  return 1;
 }
+
+sub get { $_[0]->{config}{ $_[1] } }
+
+sub delete {
+  my ( $self, $name ) = @_;
+  delete $self->{_configs}[0]{$name};
+  $self->_merge_configs;
+  $self->{_config_modified} = 1;
+  return 1;
+}
+
+##############################################################################
+# Convenience methods
+
+our $AUTOLOAD;
+
+AUTOLOAD {
+  ( my $method = $AUTOLOAD ) =~ s/^.*:://;
+
+  my ( $self ) = @_;
+
+  die "$method is not a valid config method"
+    unless exists $self->{config}{$method};
+
+  return $self->{config}{$method};
+}
+
+DESTROY { }
+
+sub modified { $_[0]->{_config_modified} }
+sub default_config { $_[0]->{default_config} || {} }
+sub configfile { $_[0]->{configfile} }
+
+##############################################################################
+# Utilities
 
 sub _load_config {
   my ( $self, $filename ) = @_;
@@ -80,7 +134,7 @@ sub _merge_configs {
   die 'bad configs key'
     if exists $self->{_configs} && ref $self->{_configs} ne 'ARRAY';
 
-  my $config = { %{ $defaults->{_configs} } };
+  my $config = { %{ $self->default_config } };
 
   my $m = Hash::Merge->new( 'RIGHT_PRECEDENT' );
 
@@ -104,84 +158,5 @@ sub _merge_configs {
 
   return 1;
 } ## end sub _merge_configs
-
-sub load_config {
-  my ( $self ) = @_;
-
-  $self->_load_config( $self->configfile );
-
-  # If _configs is 0, then we're starting from scratch, put in a default.
-
-  $self->{_configs} = [ { %{ $defaults->{_configs} } } ]
-    unless @{ $self->{_configs} };
-
-  $self->_merge_configs;
-
-  return 1;
-}
-
-sub dump     { print Dump $_[0]->{_configs}[0] }
-sub get      { $_[0]->{config}{ $_[1] } }
-sub modified { $_[0]->{_config_modified} }
-
-sub save {
-  my ( $self ) = @_;
-
-  DumpFile( $self->configfile, $self->{_configs}[0] );
-
-  warn sprintf "%s saved\n", $self->configfile;
-  $self->{_config_modified} = 0;
-  return 1;
-}
-
-sub set {
-  my ( $self, $name, $value ) = @_;
-  $self->{_configs}[0]{$name} = $value;
-  $self->_merge_configs;
-  $self->{_config_modified} = 1;
-  return 1;
-}
-
-sub delete {
-  my ( $self, $name ) = @_;
-  delete $self->{_configs}[0]{$name};
-  $self->_merge_configs;
-  $self->{_config_modified} = 1;
-  return 1;
-}
-
-sub add {
-  my ( $self, $name, $el ) = @_;
-
-  if ( exists $self->{_configs}[0]{$name} ) {
-    my $ref = ref $self->{_configs}[0]{$name};
-
-    if ( $ref eq 'ARRAY' ) {
-      $self->_add_to_array( $name, $el );
-
-    } elsif ( $ref eq 'HASH' ) {
-      die "haven't written support for hashes in config add yet";
-
-    } elsif ( $ref ne '' ) {
-      die "ref type $ref not supported in config add";
-
-    } else {
-      $self->{_configs}[0]{$name} .= $el;
-
-    }
-  } else {
-    return $self->set( $name, $el );
-  }
-}
-
-sub _add_to_array {
-  my ( $self, $name, $el ) = @_;
-
-  die "$name is not an array ref"
-    unless ref $self->{_configs}[0]{$name} eq 'ARRAY';
-
-  push @{ $self->{_configs}[0]{$name} }, $el;
-  return 1;
-}
 
 1;
