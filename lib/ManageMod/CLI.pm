@@ -37,17 +37,7 @@ use File::Basename 'basename';
 use Hash::Merge 'merge';
 use Hash::Merge::Extra 'R_ADDITIVE';
 
-our $defaults = {
-  saveconfig => 0,
-  dumpconfig => 0,
-};
-
-our $default_config = {
-  channels  => [],
-  directory => undef,
-  mcversion => undef,
-  mods      => [],
-};
+our $defaults = {};
 
 {
   no warnings 'redefine';
@@ -65,7 +55,6 @@ our $default_config = {
 
     my $cfg_args = {
       configfile => delete $self->{configfile},
-      default_config => $default_config,
     };
 
     $self->{'config'} = ManageMod::Config->new( $cfg_args );
@@ -102,37 +91,21 @@ our $default_config = {
       }
     } ## end else [ if ( !defined $subcmd ...)]
 
-    $DB::single++;
-
     $self->config->save if $self->saveconfig;
     $self->config->dump if $self->dumpconfig;
   } ## end sub run
 }
 
-# Convenience methods
-sub config     { $_[0]->{config} }
-sub saveconfig { $_[0]->{saveconfig} }
-sub dumpconfig { $_[0]->{dumpconfig} }
+##############################################################################
+sub command         { lc basename( $_[0]->filename, '.pm' ) }
+sub config          { $_[0]->{config} }
+sub configfile      { $_[0]->config->configfile }
+sub dumpconfig      { defined $_[0]->{dumpconfig} ? 1 : undef }
+sub not_implemented { die sprintf "%s %s %s is not implemented\n", $_[0]->prog_name, $_[0]->command, $_[1] }
+sub saveconfig      { defined $_[0]->{saveconfig} ? 1 : undef }
+sub unknown_cmd     { die sprintf "Unknown command for %s: %s\n", $_[0]->command, $_[1] }
 
-sub configfile { $_[0]->config->configfile }
-
-# What command are we running as?
-sub command { lc basename( $_[0]->filename, '.pm' ) }
-
-sub unknown_cmd {
-  my ( $self, $attempt ) = @_;
-  die sprintf "Unknown command for %s: %s\n", $self->command, $attempt;
-}
-
-sub not_implemented {
-  my ( $self, $cmd ) = @_;
-  die sprintf "%s %s %s is not implemented\n", $self->prog_name, $self->command, $cmd;
-}
-
-# require App::CLI::Command::Help?
-sub help {
-  my ( $self ) = @_;
-  die "Sorry. Help has not been implemented.\n";
-}
+# XXX: require App::CLI::Command::Help?
+sub help { die "Sorry. Help has not been implemented.\n" }
 
 1;

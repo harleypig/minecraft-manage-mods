@@ -12,15 +12,12 @@ use List::MoreUtils qw( all any uniq );
 
 our @valid_channels = qw( alpha beta release );
 
+sub remove { defined $_[0]->{remove} ? 1 : undef }
+
 sub default_subcmd {
   my ( $self ) = @_;
   $self->{dumpconfig} = 1;
   return 1;
-}
-
-sub remove {
-  my ( $self ) = @_;
-  return defined $self->{remove} ? 1 : 0;
 }
 
 sub _remove_el {
@@ -54,30 +51,6 @@ sub _validate_channels {
   return $valid;
 }
 
-sub _validate_mods {
-  my ( $self, $array ) = @_;
-  @$array = uniq sort @$array;
-}
-
-sub _simple_handler {
-  my ( $self, $el ) = @_;
-
-  return $self->_remove_el( $el )
-    if $self->remove;
-
-  return printf "%s\n", $self->config->$el || 'no value set'
-    unless @ARGV;
-
-  my $value = shift @ARGV;
-  $self->config->set( $el, $value );
-  $self->{saveconfig} = 1;
-
-  warn "extra parameters ignored\n"
-    if @ARGV;
-
-  return 0;
-} ## end sub _simple_handler
-
 sub _array_handler {
   my ( $self, $el ) = @_;
 
@@ -98,7 +71,7 @@ sub _array_handler {
 
     $self->_print_array( $array, $delim );
     return 1;
-  }
+  } ## end unless ( @ARGV )
 
   my $array = $self->config->get_actual( $el ) || [];
 
@@ -133,12 +106,20 @@ sub _array_handler {
 
 sub channel   { $_[0]->_array_handler( 'channels' ) }
 sub channels  { $_[0]->_array_handler( 'channels' ) }
-sub dir       { $_[0]->_simple_handler( 'directory' ) }
-sub directory { $_[0]->_simple_handler( 'directory' ) }
 sub include   { $_[0]->_array_handler( 'include' ) }
 sub includes  { $_[0]->_print_array( $_[0]->config->include, "\n" ) }
-sub mcversion { $_[0]->_simple_handler( 'mcversion' ) }
 sub mod       { $_[0]->_array_handler( 'mods' ) }
 sub mods      { $_[0]->_array_handler( 'mods' ) }
+
+sub _string_handler {
+  my ( $self, $name ) = @_;
+  $self->config->$name( shift @ARGV, $self->remove );
+  $self->{saveconfig} = $self->config->modified;
+  print $self->config->msg;
+}
+
+sub mcversion { $_[0]->_string_handler('mcversion') }
+sub directory { $_[0]->_string_handler('directory') }
+sub dir { $_[0]->_string_handler('directory') }
 
 1;
