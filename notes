@@ -8,12 +8,25 @@ Interesting texture pack for 1.14:
   https://www.meseasonstexturepack.com/
 
 ==============================================================================
+Functionality:
+
+Download modpack
+List modpack dependencies
+
+==============================================================================
 Create web page (mc.harleypig.com), server (mc.harleypig.com)
 
 web page links to reviews of modules (static html?), current configuration, etc.
 
 ==============================================================================
+Channel Name: HarleyCraft - harleypig plays minecraft
+
 Possible Series:
+
+  Mod Showcase - Basic demo of mod
+  Learn Mod - Learn how to use mod
+  Lets Play
+
   Non-game mods (better-title-screen)
   Standalone Mods
   Pam's HarvestCraft
@@ -166,6 +179,7 @@ birds-nests
 blockdispenser
 block-drops-jei-addon
 blocksniffer
+bonsai-trees
 born-in-a-barn
 bountiful
 bountifulbaubles
@@ -178,7 +192,9 @@ chest-transporter
 chisel
 chisels-bits
 chunk-animator
+clarity
 clay-soldiers-mod
+cleanview
 client-tweaks
 climate-control-geographicraft
 clipboard
@@ -486,4 +502,3 @@ xp-from-harvest
 xtones
 yungs-better-caves
 zoesteria-valoegheses-basic-expansions
-bonsai-trees

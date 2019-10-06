@@ -17,13 +17,6 @@ our $defaults = {
   _self => {
     _config_modified => 0,
   },
-
-  _configs => {
-    channels  => [qw( release )],
-    directory => '/path/to/mods/dir',
-    mcversion => -1,
-    mods      => [],
-  },
 };
 
 ##############################################################################
@@ -41,7 +34,7 @@ sub new {
   $self->_merge_configs;
 
   return $self;
-} ## end sub new
+}
 
 sub dump { print Dump $_[0]->{config} }
 
@@ -65,6 +58,7 @@ sub set {
 }
 
 sub get { $_[0]->{config}{ $_[1] } }
+sub get_actual { $_[0]->{_configs}[0]{$_[1]} }
 
 sub delete {
   my ( $self, $name ) = @_;
@@ -92,15 +86,16 @@ AUTOLOAD {
 
 DESTROY { }
 
-sub modified { $_[0]->{_config_modified} }
+sub modified       { $_[0]->{_config_modified} }
 sub default_config { $_[0]->{default_config} || {} }
-sub configfile { $_[0]->{configfile} }
+sub configfile     { $_[0]->{configfile} }
+sub include        { $_[0]->{_configs}[0]{include} || [] }
 
 ##############################################################################
 # Utilities
 
 sub _load_config {
-  my ( $self, $filename ) = @_;
+  my ( $self, $filename, $configfile) = @_;
 
   die 'bad configs key'
     if exists $self->{_configs} && ref $self->{_configs} ne 'ARRAY';
@@ -108,7 +103,9 @@ sub _load_config {
   $self->{_configs} //= [];
 
   if ( !-r $filename ) {
-    warn "$filename does not exist or is not readable\n";
+    no warnings 'uninitialized';
+    $configfile = " (referenced in $configfile)" if $configfile;
+    warn "$filename$configfile does not exist or is not readable\n";
     return 0;
   }
 
@@ -119,7 +116,7 @@ sub _load_config {
     die "include must be an array in $filename\n"
       unless ref $newcfg->{include} eq 'ARRAY';
 
-    $self->_load_config( $_ ) for @{ $newcfg->{include} };
+    $self->_load_config( $_, $filename ) for @{ $newcfg->{include} };
   }
 
   return 1;

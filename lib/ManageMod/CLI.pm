@@ -43,9 +43,9 @@ our $defaults = {
 };
 
 our $default_config = {
-  channels  => [qw( alpha )],
-  directory => '/path/to/mods/dir',
-  mcversion => -1,
+  channels  => [],
+  directory => undef,
+  mcversion => undef,
   mods      => [],
 };
 
