@@ -50,7 +50,6 @@ our $defaults = {};
     my %self = %{ $m->merge( $defaults, {@global_args} ) };
     my $self = bless \%self, $class;
 
-    # Set defaults based on how we are running
     $self->{configfile} //= $self->prog_name . '.cfg';
 
     my $cfg_args = {

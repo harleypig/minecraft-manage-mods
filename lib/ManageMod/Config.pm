@@ -71,28 +71,10 @@ sub save {
   return 1;
 }
 
-#sub set {
-#  my ( $self, $name, $value ) = @_;
-#  $self->{_configs}[0]{$name} = $value;
-#  $self->_merge_configs;
-#  $self->{_config_modified} = 1;
-#  return 1;
-#}
-#
-#sub get        { $_[0]->{config}{ $_[1] } }
-#sub get_actual { $_[0]->{_configs}[0]{ $_[1] } }
-#
-#sub delete {
-#  my ( $self, $name ) = @_;
-#  delete $self->{_configs}[0]{$name};
-#  $self->_merge_configs;
-#  $self->{_config_modified} = 1;
-#  return 1;
-#}
-
 # XXX: Autoload?
 sub mcversion { shift->_string_handler( 'mcversion', @_ ) }
 sub directory { shift->_string_handler( 'directory', @_ ) }
+sub channels  { shift->_array_handler('channels', @_) }
 
 sub _validate_mcversion {
   my $t = $_[1]; return any { /^$t$/ } @{ $_[0]->mcversions };
@@ -194,7 +176,7 @@ sub _merge_configs {
 ##############################################################################
 # Element Utilities
 
-sub _el_get { $_[0]->{_msg} = $_[0]->{config}{ $_[1] } || 'no value set' }
+sub _el_get { return $_[0]->{config}{ $_[1] } || 'no value set' }
 
 sub _el_del {
   my ( $self, $name ) = @_;
@@ -245,8 +227,10 @@ sub _string_handler {
 sub _array_handler {
   my ( $self, $name, $value, $del ) = @_;
 
+  $DB::single++;
+
   die "expecting array ref in second parameter to _array_handler"
-    if defined $value && ref $value eq 'ARRAY';
+    if defined $value && ref $value ne 'ARRAY';
 
   $value //= [];
   $del   //= 0;
@@ -255,9 +239,9 @@ sub _array_handler {
     if $del && !$value;
 
   return $self->_el_get( $name )
-    unless $value;
+    unless @$value;
 
-  my @els = @{ $self->{_configs}[0]{$name} } || [];
+  my $els = defined $self->{_configs}[0]{$name} ? @{ $self->{_configs}[0]{$name} } : [];
 
   die "expecting $name to be an array ref in _array_handler"
     unless ref $els eq 'ARRAY';
