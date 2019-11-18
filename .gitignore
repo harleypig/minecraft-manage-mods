@@ -2,3 +2,4 @@
 *.yml
 nohup.out
 testit/*
+t/*
