@@ -1,3 +1,10 @@
+This looks like what I'm looking for:
+  https://twitchappapi.docs.apiary.io/
+
+project id (from modlist) lookup:
+  https://cursemeta.dries007.net/<projectid>/<fileid>.json
+
+==============================================================================
 pre-generate world?
   chunkpregenerator
 

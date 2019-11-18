@@ -2,8 +2,7 @@ package ManageMod::Cache;
 
 ## no critic
 
-use strict;
-use warnings;
+use strictures 2;
 
 #############################################################################
 =head1 NAME

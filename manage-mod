@@ -34,13 +34,13 @@ BEGIN {
 
 use lib "$RealBin/lib";
 
-use Log::Any::Adapter;
 use ManageMod::CurseForge;
 use YAML::Syck;
 
+#-----------------------------------------------------------------------------
+use Log::Any::Adapter;
 use Log::Any '$log';
 
-#-----------------------------------------------------------------------------
 my $LogFile = "$ENV{MANAGE_MOD_CACHE_DIR}/$ENV{MANAGE_MOD_BASENAME}.log";
 Log::Any::Adapter->set( 'File', "$LogFile", log_level => 'debug' );
 

@@ -2,21 +2,19 @@ package ManageMod::CurseForge;
 
 ## no critic
 
-use strict;
-use warnings;
+use strictures 2;
 
 use parent 'Exporter::Tiny';
 
-## no critic Modules::ProhibitAutomaticExportation
 our @EXPORT = qw(get_mod_data);
 
 use Log::Any '$log';
 use Time::Piece;
 use Hash::Merge::Simple 'merge';
+use Scalar::Util 'looks_like_number';
 
 use ManageMod::GetData;
 use ManageMod::Cache;
-use Scalar::Util 'looks_like_number';
 
 my $LOCAL_FILE_CACHE = "$ENV{MANAGE_MOD_CACHE_DIR}/files";
 

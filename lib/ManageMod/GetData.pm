@@ -90,11 +90,6 @@ sub _get_url {
   unless ( defined $data ) {
     $log->info( 'url cache expired or not there, freshening data' );
 
-    #    require LWP::UserAgent;
-    #
-    #    my $ua = LWP::UserAgent->new( ssl_opts => { verify_hostname => 1 } );
-    #    $ua->agent( $ENV{MANAGE_MOD_AGENT} );
-
     my $header   = HTTP::Request->new( GET => $url );
     my $request  = HTTP::Request->new( 'GET', $url, $header );
     my $response = _ua->request( $request );

@@ -2,13 +2,26 @@
 
 ## no critic
 
+#  Give project name
+#  Give project id
+
+#  Give list of project names
+#  Give list of project ids
+#  Give mixed list
+
 use strictures 2;
 
 use FindBin qw( $RealBin );
+use Log::Any::Adapter;
+use Log::Any '$log';
 
 use lib "$RealBin/lib";
 
 use ManageMod::CLI;
+
+#my $LogFile = "$ENV{MANAGE_MOD_CACHE_DIR}/$ENV{MANAGE_MOD_BASENAME}.log";
+my $LogFile = "./wip.log";
+Log::Any::Adapter->set( 'File', "$LogFile", log_level => 'debug' );
 
 unshift @ARGV, 'help' unless @ARGV;
 

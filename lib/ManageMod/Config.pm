@@ -9,6 +9,7 @@ use namespace::clean;
 use YAML::XS qw( LoadFile DumpFile Dump );
 use Hash::Merge;
 use List::MoreUtils qw( any uniq );
+use Log::Any '$log';
 
 $YAML::XS::Boolean = 'JSON::PP';
 $YAML::XS::Indent  = 2;

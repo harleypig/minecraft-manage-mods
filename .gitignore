@@ -3,3 +3,5 @@
 nohup.out
 testit/*
 t/*
+t[0-9]*
+twitchapi.tmp
