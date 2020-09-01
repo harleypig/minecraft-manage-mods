@@ -2,7 +2,11 @@ package ManageMod::CLI::Config;
 
 ## no critic;
 
-use base 'App::CLI::Command';
+use base qw(App::CLI App::CLI::Command);
+
+use constant alias => (
+  commands => '+App::CLI::Commnad::Commands',
+);
 
 use constant options => ( 'remove!' => 'remove' );
 
@@ -12,6 +16,20 @@ use List::MoreUtils qw( all any uniq );
 use Log::Any '$log';
 
 our @valid_channels = qw( alpha beta release );
+
+##############################################################################
+=pod
+
+=head1 NAME
+
+ManageMod::CLI::Config - config commands
+
+=head1 DESCRIPTION
+
+blah blah (MM::CLI::Config.pm)
+
+=cut
+##############################################################################
 
 sub remove { defined $_[0]->{remove} ? 1 : undef }
 

@@ -30,6 +30,16 @@ our $new_default = {
     mods      => [],
   } };
 
+
+##############################################################################
+=pod
+
+=head1 WIP Config
+
+  blah blah (MM::Config.pm)
+
+=cut
+
 ##############################################################################
 sub new {
   my ( $class, $args ) = @_;
@@ -40,6 +50,9 @@ sub new {
   $args //= {};
 
   my $self = bless Hash::Merge::merge( $new_default, $args ), $class;
+
+  die "Could not access configfile ($self->configfile)"
+    unless defined $self->configfile && -r $self->configfile;
 
   $self->_load_config( $self->configfile );
   $self->_merge_configs;
@@ -103,15 +116,12 @@ DESTROY { }
 # Config Utilities
 
 sub _load_config {
-  my ( $self, $filename, $configfile ) = @_;
+  my ( $self, $configfile, $referencefile ) = @_;
 
-  die "No config file passed.\n"
-    unless defined $filename && $filename ne '';
-
-  if ( !-r $filename ) {
+  if ( !-r $configfile ) {
     no warnings 'uninitialized';
-    $configfile = " (referenced in $configfile)" if $configfile;
-    warn "$filename$configfile does not exist or is not readable\n";
+    my $warntext = " (referenced in $referencefile)" if $referencefile;
+    warn "$configfile$warntext does not exist or is not readable\n";
     return undef;
   }
 
@@ -120,20 +130,20 @@ sub _load_config {
 
   $self->{_configs} //= [];
 
-  my $newcfg = LoadFile( $filename );
+  my $newcfg = LoadFile( $configfile );
   push @{ $self->{_configs} }, $newcfg;
 
   if ( exists $newcfg->{include} ) {
-    die "include must be an array in $filename\n"
+    die "include must be an array in $configfile\n"
       unless ref $newcfg->{include} eq 'ARRAY';
 
     for my $if ( @{ $newcfg->{include} } ) {
       if ( !defined $if || $if eq '' ) {
-        warn "empty includes don't make sense (in $filename)\n";
+        warn "empty includes don't make sense (in $configfile)\n";
         continue;
       }
 
-      $self->_load_config( $_, $filename );
+      $self->_load_config( $if, $configfile );
     }
   }
 
@@ -227,8 +237,6 @@ sub _string_handler {
 #-----------------------------------------------------------------------------
 sub _array_handler {
   my ( $self, $name, $value, $del ) = @_;
-
-  $DB::single++;
 
   die "expecting array ref in second parameter to _array_handler"
     if defined $value && ref $value ne 'ARRAY';

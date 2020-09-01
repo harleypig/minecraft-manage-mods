@@ -20,6 +20,8 @@ use constant alias => (
   '--help' => '+App::CLI::Command::Help',
   '-h'     => '+App::CLI::Command::Help',
   'help'   => '+App::CLI::Command::Help',
+
+  commands => '+App::CLI::Commnad::Commands',
 );
 
 use constant global_options => (
@@ -27,6 +29,17 @@ use constant global_options => (
   's|save!'    => 'saveconfig',
   'd|dump!'    => 'dumpconfig',
 );
+
+##############################################################################
+=pod
+
+=head1 WIP Config
+
+ManageMod::CLI - cli commands
+
+blah blah (MM::CLI.pm)
+
+=cut
 
 ##############################################################################
 # Add my own functions to App::CLI::Command object
@@ -80,6 +93,8 @@ our $defaults = {};
 
       die $log->fatalf('%s is marked as todo but has a method defined', $subcmd)
         if $todo && $can;
+
+      $DB::single++;
 
       if ( $todo ) {
         $self->not_implemented( $subcmd );
