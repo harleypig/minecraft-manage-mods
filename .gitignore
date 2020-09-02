@@ -5,7 +5,3 @@ nohup.out
 # Temp files and dirs
 t/*
 t[0-9]*
-
-# Temporary, clean up when done developing.
-testit/*
-twitchapi.tmp

@@ -1,0 +1,38 @@
+manage-mods <instance> <action>
+  create cfg/instance.cfg if it doesn't exist
+
+Actions:
+
+update
+  update all mods
+
+config
+  directory <valid path>
+    path to mods dir
+    overwrite any existing entry
+    fail if parent dir doesn't exist
+    create target dir if doesn't exist
+
+  mcversion <valid version>
+    supported minecraft version
+    overwrite any existing entry
+    must be a valid version
+
+  channels [add|remove] [valid channels]
+    add list of channels
+    remove list of channels
+    space separated list of paths
+
+  include [add|remove] [valid paths to config files to include]
+    add list of paths
+    remove list of paths
+    space separated list of paths of config files to include
+
+mod
+  add modname
+  remove modname
+  update modname
+  freeze modname
+
+* TODO
+* support adding specific version of mod
